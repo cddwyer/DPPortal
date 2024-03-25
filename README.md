@@ -139,11 +139,11 @@ dpportal uninstall
 
 To display help and usage:
 ```
-dp-portal -h
+dpportal -h
 ```
 or
 ```
-dp-portal --help
+dpportal --help
 ```
 
 ## Legal fluff
