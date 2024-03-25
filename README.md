@@ -21,7 +21,7 @@ and logo, with multiple sign-in options available, all of which will harvest
 the credentials entered.
 
 > [!WARNING]
-> This project is still under development. You will notice that files that should be bash scripts are currently plain text files. I will save them as .sh files once developed to an acceptably functioning v1.0 and will remove this warning message.
+> This project is still under development. You will notice that files that should be bash scripts are currently plain text files. I will change them to .sh files once developed to an acceptable/functional v1.0 and will remove this warning message.
 
 ## Description
 
@@ -65,45 +65,32 @@ menu in the previous step.
 
 ## Getting Started
 
-### Dependencies
+### Installing and running DPPortal
 
-#### Operating System
+#### Operating System Requirements
 * This has been tested on Kali Linux 2023.2 onwards but will probably work 
 on Ubuntu as well providing all dependant packags are installed. Run with 
 GNU Bash v5.x+, PHP v7.x+
 
-#### Dependent Packages
+#### Package Dependencies
 
 *berate_ap 
-
 *eterm
-
 *airmon-ng
-
 *LAMP (Linux, Apache2, MySQL and PHP)
-
 *git (obvs) 
-
 *hostapd-mana
-
 *bash
-
 *util-linux
-
 *procps or procps-ng
-
 *iproute2
-
 *iw
-
 *iwconfig (only if 'iw' doesn't recognise your attached W-NIC)
-
 *dnsmasq
-
 *iptables
 
 
-### Installing
+### Installation
 
 To install DPPortal on your machine run:
 ```
@@ -128,14 +115,27 @@ sudo bash install.sh
 
 ### Running DPPortal
 
-* Run dp-portal from terminal
-* Choose your desired action from the main menu
+* Run dp-portal from terminal with your main intended function as an arguement.
+
+* To set the portal branding run:
 
 ```
-dp-portal
+dpportal setbrand
 ```
 
-## Help
+* To fire up the portal run:
+
+```
+dpportal run
+```
+
+* To uninstall DPPortal run:
+
+```
+dpportal uninstall
+```
+
+### Show Usage/Help
 
 To display help and usage:
 ```
@@ -173,7 +173,7 @@ This project is licensed under the MIT License. You're free to copy, edit or clo
 any part of my code for your own educational benefit, just please dont plagurise 
 the project and claim credit for yourself, that's not cool.
 
-## Acknowledgments
+### Acknowledgments
 
 Inspiration, code snippets, etc.
 * [awesome-readme](https://github.com/matiassingers/awesome-readme)
