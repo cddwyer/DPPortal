@@ -101,15 +101,32 @@ GNU Bash v5.x+, PHP v7.x+
 
 ### Installing
 
+To install DPPortal on your machine run:
+```
 git clone https://github.com/ddwyer/dpportal.git
+```
+to clone the repository, then step into the parent directory:
+```
 cd dpportal
+```
+give the install script execution permissions by running:
+```
 chmod a+x install.sh
-./install.sh
+```
+Then, finally, as root or with sudo privileges run the install script itself:
+```
+sudo ./install.sh
+```
+or
+```
+sudo bash install.sh
+```
 
-### Executing program
+### Running DPPortal
 
 * Run dp-portal from terminal
 * Choose your desired action from the main menu
+
 ```
 dp-portal
 ```
@@ -130,6 +147,9 @@ dp-portal --help
 Double_D
 
 ## Version History
+
+* 0.3 Editing the README file to test and configure git on my dev box
+	* Reformatted some text, clarified instuctions and added credits
 
 * 0.2
     * Various bug fixes and optimizations
