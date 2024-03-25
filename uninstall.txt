@@ -1,0 +1,106 @@
+#!/bin/bash
+
+####Stuff to be used in formatting
+
+function _printPoweredBy()
+{
+    cat <<"EOF"
+
+
+
+  _____  _____        _____   ____  _____ _______       _      
+ |  __ \|  __ \      |  __ \ / __ \|  __ \__   __|/\   | |     
+ | |  | | |__) |_____| |__) | |  | | |__) | | |  /  \  | |     
+ | |  | |  ___/______|  ___/| |  | |  _  /  | | / /\ \ | |     
+ | |__| | |          | |    | |__| | | \ \  | |/ ____ \| |____ 
+ |_____/|_|          |_|     \____/|_|  \_\ |_/_/    \_\______|
+                                                               
+
+  written by: Double_D
+
+
+
+
+################################################################
+EOF
+}
+
+#Bells and whistles
+function _arrow()
+{
+    printf "➜ $@\n"
+}
+
+function _success()
+{
+    printf "${_green}✔ %s${_reset}\n" "$@"
+}
+
+function _error() {
+    printf "${_red}✖ %s${_reset}\n" "$@"
+}
+
+function _die()
+{
+    _error "$@"
+    exit 1
+}
+
+
+### DPPortal uninstall script ###
+
+
+#Disable site in apache2
+
+
+clear
+_printPoweredBy
+_arrow "Disabling sites..."
+sleep 0.5
+
+a2dissite dpportal.conf
+a2dissite dppoptions.conf
+a2dissite dppdisplay.conf
+
+sleep 2
+
+echo -e "\n\n\n"
+_arrow "Reloading Apache2"
+
+#Reload Apache
+systemctl reload apache2
+
+sleep 1
+
+_arrow "Removing site ocnfig files"
+#Remove site config files
+rm -f /etc/apache2/sites-available/dpportal.conf
+rm -f /etc/apache2/sites-available/dppoptions.conf
+rm -f /etc/apache2/sites-available/dppdisplay.conf
+
+sleep 0.5
+
+_arrow "Removing site content..."
+
+#Remove site content
+rm -rf /var/www/dpportal
+rm -rf /var/www/dppoptions
+rm -rf /var/www/dppdisplay
+
+sleep 0.5
+
+_arrow "Removing log files..."
+#Remove log files
+rm -rf /var/log/apache2/dpporta*
+
+_arrow "Removing runtime files..."
+#Remove etc content
+rm -rf /etc/dpportal/config
+rm -rf $0
+rmdir `dirname $0`
+rmdir /etc/dpportal
+
+clear
+_success "Successfully uninstalled DPPortal. Thanks for giving it a go, hope to see you again soon!"
+
+exit 0

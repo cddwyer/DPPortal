@@ -1,0 +1,144 @@
+#!/bin/bash
+
+### Wrapper for DPPortal runtime ###
+
+###Lets gather some vars
+
+##Colours and formatting for stdOut and stdErr
+warn="\e[1;31m"      # warning (red)
+info="\e[1;34m"      # info (blue)
+q="\e[1;32m"         # questions (green)
+
+## Runtime directory
+runtimeDir=/etc/dpportal/run
+
+
+###Some more colour and formatting vars, some may become redundant as I continue to dev and tidy up my project
+_bold=$(tput bold)
+_underline=$(tput sgr 0 1)
+_reset=$(tput sgr0)
+_purple=$(tput setaf 171)
+_red=$(tput setaf 1)
+_green=$(tput setaf 76)
+_tan=$(tput setaf 3)
+_blue=$(tput setaf 38)
+
+#Function that prints arrows and formats stdout stuff then arguement (just bells and whistles)
+function _arrow()
+{
+    printf "➜ $@\n"
+}
+
+function _success()
+{
+    printf "${_green}✔ %s${_reset}\n" "$@"
+}
+
+function _error() {
+    printf "${_red}✖ %s${_reset}\n" "$@"
+}
+
+function _die()
+{
+    _error "$@"
+    exit 1
+}
+
+function printUsage()
+{
+	clear
+	_printPoweredBy
+	echo -e "$info\nCall DPPortal with the function you wish to run, example: \n\n\ndpportal run\n\n or \n\ndpportal setbrand\n\ndpportal uninstall\n\n"
+	_safeExit
+}
+
+function processArgs()
+{
+
+    # Get function called and refer shell to relavent script
+    for arg in "$@"
+    do
+        case $arg in
+            setbrand)
+				cd $runtimeDir
+				./setBrand.sh
+            ;;
+            run)
+				cd $runtimeDir
+				./bootstrap.sh
+            ;;
+			uninstall)
+				read -p "Are you sure you want to uninstall this fine tool?!"
+                cd $runtimeDir
+                ./uninstall.sh
+            ;;
+            -h|--help)
+                printUsage()
+            ;;
+            *)
+                printUsage()
+            ;;
+        esac
+    done
+
+}
+
+function _safeExit()
+{
+    exit 0
+}
+
+function ctrl_c()
+{
+	echo -n -e "$infoExiting DP_Portal."
+	systemctl stop apache2 2>&1 /dev/null
+	sleep 1.5
+   _safeExit
+}
+
+trap ctrl_c INT TERM
+
+function _printPoweredBy()
+{
+    cat <<"EOF"
+
+
+
+  _____  _____        _____   ____  _____ _______       _      
+ |  __ \|  __ \      |  __ \ / __ \|  __ \__   __|/\   | |     
+ | |  | | |__) |_____| |__) | |  | | |__) | | |  /  \  | |     
+ | |  | |  ___/______|  ___/| |  | |  _  /  | | / /\ \ | |     
+ | |__| | |          | |    | |__| | | \ \  | |/ ____ \| |____ 
+ |_____/|_|          |_|     \____/|_|  \_\ |_/_/    \_\______|
+                                                               
+
+  written by: Double_D
+
+
+
+
+################################################################
+EOF
+sleep 1
+}
+
+function checkRoot() {
+	#Check if running as root first
+	scriptUser=$(id -u)
+	if [[ $scriptUser -ne 0 ]]; then
+		echo -e "$warn\nThis script needs to be run with sudo privileges. Exiting, no changes have been made...\n"
+		_die "Insufficiently privileged! Bye."
+	fi
+}
+
+
+function openingMsg() {
+
+clear
+_printPoweredBy
+checkRoot
+processArgs
+
+}
+
+openingMsg
