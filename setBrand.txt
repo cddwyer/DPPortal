@@ -145,25 +145,19 @@ esac
 function setBrand()
 {
 
-listCurrent
+	listCurrent
 
-_arrow
-echo -e "$q\nWhich branding set would you list to use (enter number from list)...\n\n"
-read brandAnswer
-
-clear
-_printPoweredBy
-_arrow
-echo -e "$info\nSetting brand...\n\n"
-
-newBrand=$(cat $brandsFile | tail -n+$brandAnswer | head -1 | awk '{print $1}')
-
-cp -f /var/www/dpportal/brands/$newBrand/* /var/www/dpportal/
-
-echo $newBrand > /etc/dpportal/config/current.conf
-
-systemctl reload apache2
-
+	_arrow
+	echo -e "$q\nWhich branding set would you list to use (enter number from list)...\n\n"
+	read brandAnswer
+	clear
+	_printPoweredBy
+	_arrow
+	echo -e "$info\nSetting brand...\n\n"
+	newBrand=$(cat $brandsFile | tail -n+$brandAnswer | head -1 | awk '{print $1}')
+	cp -f /var/www/dpportal/brands/$newBrand/* /var/www/dpportal/
+	echo $newBrand > /etc/dpportal/config/current.conf
+	systemctl reload apache2
 
 
 }
@@ -173,11 +167,11 @@ systemctl reload apache2
 function trollMsg()
 {
 
-clear
-_printPoweredBy
+	clear
+	_printPoweredBy
 
-echo -e "$warn\n\n\n\n\nI don't know how but you fucked something up somewhere. Try harder next time!\n\n"
-_die "Someone's a JM...!"
+	echo -e "$warn\n\n\n\n\nI don't know how, but you fucked up a simple menu choice. Try harder next time!\n\n"
+	_die "Someone's a JM...!"
 
 }
 
@@ -186,86 +180,86 @@ _die "Someone's a JM...!"
 function createNewBrand()
 {
 
-#Standard header
-clear
-_printPoweredBy
-
-echo "$info\n\nLets get this new brand setup.\n\n"
-
-
-#Get user friendly name of company branding to use
-echo -e "$qWhat's the user friendly name (in proper case) of the company branding you're going to use? (e.g. Starbucks Coffee)"
-read newFriendlyName
-
-if [[ -z "$newFriendlyName" ]]; then
-	echo -e "$warn\nThis can't be blank! Bye now. Troll!"
-	_error "You done fucked up!"
-	sleep 3
-	mainMenu
-fi
-
-#Get shortname to use in folder naming
-echo -e "$qWhat's a shortname for the branding? This cannot contain special characters or spaces! (e.g. for Transport For London use TFL or londontransport etc.)"
-read newShortName
-
-if [[ -z "$newShortName" ]]; then
-	echo -e "$warnThis can't be blank! Bye now. Troll!"
-    _die "You done fucked up!"
-    sleep 3
-    clear
-    mainMenu
-fi
-
-_arrow
-
-#Get background image
-echo -e "$qPlease enter the full file path to a background image for the page in PNG or JPG form only(if it's not big enough, it will end up looking stretched!)\n\n"
-read newBrandGBI
-
-if [[ -z "$newBrandBGI" ]]; then
-	echo -e "$warnThis can't be blank! Bye now. Troll!"
-    _die "You done fucked up!"
-fi
-
-bgiFileType=$(identify $newBrandBGI | awk '{print $2}')
-
-if [[ "$bgiFileType" != "JPEG" && "$bgiFileType" != "PNG" ]]; then
-	echo -e "$warn\nFam it needs to be an image of the jpg or png variety.\n"
-    echo -e "$info\nSending you back to the main menu...\n"
-    sleep 5
-    mainMenu
-fi
-
-_arrow
-
-#Get logo image
-echo -e "$qPlease enter the full file path to a small logo/badge image for the new branding.\n\n"
-read newBrandLogo
-
-newBLType=$(identify $newBrandLogo | awk '{print $2}')
-
-if [[ -z "$newBrandLogo" ]]; then
-	echo -e "$warnThis can't be blank! Bye now. Troll!"
-    _die "You done fucked up!"
-fi
-
-if [[ "$newBLType" != "JPEG" && "newBLType" != "PNG" ]]; then
-	echo -e "$warn\nFam it needs to be an image of the jpg or png variety.\n"
-	echo -e "$info\nSending you back to the main menu...\n"
-	sleep 5
-	mainMenu
-fi
-
-#Make directory for brand
-mkdir -p /var/www/dpportal/brands/$newShortName
-
-#Copy images to new locations
-cp $newBrandBGI /var/www/dpportal/brands/$newShortName/
-cp $newBrandLogo /var/www/dpportal/brands/$newShortName/
+	#Standard header
+	clear
+	_printPoweredBy
+	
+	echo "$info\n\nLets get this new brand setup.\n\n"
 
 
-#Add brand to list file
-echo "$newShortName $NewFriendlyName" >> /etc/dpportal/config/brands.lst
+	#Get user friendly name of company branding to use
+	echo -e "$qWhat's the user friendly name (in proper case) of the company branding you're going to use? (e.g. Starbucks Coffee)"
+	read newFriendlyName
+
+	if [[ -z "$newFriendlyName" ]]; then
+		echo -e "$warn\nThis can't be blank! Bye now. Troll!"
+		_error "You done fucked up!"
+		sleep 3
+		mainMenu
+	fi
+
+	#Get shortname to use in folder naming
+	echo -e "$qWhat's a shortname for the branding? This cannot contain special characters or spaces! (e.g. for Transport For London use TFL or londontransport etc.)"
+	read newShortName
+
+	if [[ -z "$newShortName" ]]; then
+		echo -e "$warnThis can't be blank! Bye now. Troll!"
+	    _die "You done fucked up!"
+	    sleep 3
+	    clear
+	    mainMenu
+	fi
+
+	_arrow
+
+	#Get background image
+	echo -e "$qPlease enter the full file path to a background image for the page in PNG or JPG form only(if it's not big enough, it will end up looking stretched!)\n\n"
+	read newBrandGBI
+
+	if [[ -z "$newBrandBGI" ]]; then
+		echo -e "$warnThis can't be blank! Bye now. Troll!"
+	    _die "You done fucked up!"
+	fi
+
+	bgiFileType=$(identify $newBrandBGI | awk '{print $2}')
+
+	if [[ "$bgiFileType" != "JPEG" && "$bgiFileType" != "PNG" ]]; then
+		echo -e "$warn\nFam it needs to be an image of the jpg or png variety.\n"
+	    echo -e "$info\nSending you back to the main menu...\n"
+	    sleep 5
+	    mainMenu
+	fi
+
+	_arrow
+
+	#Get logo image
+	echo -e "$qPlease enter the full file path to a small logo/badge image for the new branding.\n\n"
+	read newBrandLogo
+
+	newBLType=$(identify $newBrandLogo | awk '{print $2}')
+
+	if [[ -z "$newBrandLogo" ]]; then
+		echo -e "$warnThis can't be blank! Bye now. Troll!"
+	    _die "You done fucked up!"
+	fi
+
+	if [[ "$newBLType" != "JPEG" && "newBLType" != "PNG" ]]; then
+		echo -e "$warn\nFam it needs to be an image of the jpg or png variety.\n"
+		echo -e "$info\nSending you back to the main menu...\n"
+		sleep 5
+		mainMenu
+	fi
+
+	#Make directory for brand
+	mkdir -p /var/www/dpportal/brands/$newShortName
+
+	#Copy images to new locations
+	cp $newBrandBGI /var/www/dpportal/brands/$newShortName/
+	cp $newBrandLogo /var/www/dpportal/brands/$newShortName/
+
+
+	#Add brand to list file
+	echo "$newShortName $NewFriendlyName" >> /etc/dpportal/config/brands.lst
 
 }
 
