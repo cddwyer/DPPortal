@@ -68,20 +68,34 @@ menu in the previous step.
 on Ubuntu as well providing all dependant packags are installed. Run with 
 GNU Bash v5.x+, PHP v7.x+
 
-#### Dependent Packages 
+#### Dependent Packages
+
 *berate_ap 
+
 *eterm
+
 *airmon-ng
+
 *LAMP (Linux, Apache2, MySQL and PHP)
+
 *git (obvs) 
+
 *hostapd-mana
+
 *bash
+
 *util-linux
+
 *procps or procps-ng
+
 *iproute2
+
 *iw
+
 *iwconfig (only if 'iw' doesn't recognise your attached W-NIC)
+
 *dnsmasq
+
 *iptables
 
 
@@ -133,3 +147,4 @@ Inspiration, code snippets, etc.
 * [awesome-readme](https://github.com/matiassingers/awesome-readme)
 * [LitePhish](https://github.com/DarkSecsDevelopers/LitePhish) - Bot detection PHP script and various fake login page clones
 * [Pedz](For introducing me to bash/the UNIX command line in general.)
+* [Colin](For additional help and support developing my commandline skills.)
