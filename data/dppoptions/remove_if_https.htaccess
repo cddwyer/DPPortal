@@ -1,0 +1,14 @@
+php_value display_errors 1
+
+# Please remmeber
+# if your site have valid certificate then rename filename from **remove_if_https.htaccess** to **.htaccess**
+# Else web broswers will probably say that site is insecure.
+
+#Redirect from http to https starts...
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+#Redirect from http to https ends...
+
+#No display of files
+Options All -Indexes

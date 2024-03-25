@@ -1,0 +1,273 @@
+#!/bin/bash
+
+#####Setting vars and spitting bars#####
+
+#Set sciptempls for colouring echo lines
+warn="\e[1;31m"      # warning (red)
+info="\e[1;34m"      # info (blue)
+q="\e[1;32m"         # questions (green)
+
+###Some more colour and formatting vars, some may become redundant as I continue to dev and tidy up my project
+_bold=$(tput bold)
+_underline=$(tput sgr 0 1)
+_reset=$(tput sgr0)
+_purple=$(tput setaf 171)
+_red=$(tput setaf 1)
+_green=$(tput setaf 76)
+_tan=$(tput setaf 3)
+_blue=$(tput setaf 38)
+
+trap _safeExit SIGINT SIGTERM
+
+function _printPoweredBy()
+{
+    cat <<"EOF"
+
+
+
+  _____  _____        _____   ____  _____ _______       _      
+ |  __ \|  __ \      |  __ \ / __ \|  __ \__   __|/\   | |     
+ | |  | | |__) |_____| |__) | |  | | |__) | | |  /  \  | |     
+ | |  | |  ___/______|  ___/| |  | |  _  /  | | / /\ \ | |     
+ | |__| | |          | |    | |__| | | \ \  | |/ ____ \| |____ 
+ |_____/|_|          |_|     \____/|_|  \_\ |_/_/    \_\______|
+                                                               
+
+  written by: Double_D
+
+Captive portal branding setup.
+
+
+################################################################
+EOF
+}
+
+
+
+#Check if running as root first
+scriptUser=$(id -u)
+if [[ $scriptUser -ne 0 ]]; then
+	echo -e "$warn\nThis script needs to be run with sudo privileges. Exiting, no changes have been made...\n"
+	exit 1
+fi
+
+#Function that prints arrow then arguement (just bells and whistles)
+function _arrow()
+{
+    printf "➜ $@\n"
+}
+
+function _success()
+{
+    printf "${_green}✔ %s${_reset}\n" "$@"
+}
+
+function _error() {
+    printf "${_red}✖ %s${_reset}\n" "$@"
+}
+
+function _die()
+{
+    _error "$@"
+    exit 1
+}
+
+function _safeExit()
+{
+	echo -n -e "$infoExiting DP_Portal."
+	for i in $(seq 1 5)
+    do
+		sleep 1
+		echo -n "."
+	done
+	exit 0
+}
+
+brandsFile=/etc/dpportal/config/brands.lst
+portalWebDir=/var/www/dpportal/
+currentBrand=$(cat /etc/dpportal/config/current.conf | awk '{print $1=""; $0}')
+
+
+###########Set branding for Captive portal##################
+
+
+#Display list of currently installed branding packs
+function listCurrent()
+{
+
+clear
+_printPoweredBy
+_arrow
+echo -e "$info\n\nList of installed branding."
+cat -n $brandsFile | awk '{print $2=""; $0}'
+
+}
+
+#############################
+
+
+#Main menu
+function mainMenu()
+{
+clear
+_printPoweredBy
+_arrow
+
+echo -e "$info\n What would you like to do today?\n\n\n"
+
+echo -e "\n1. List currently installed branding options.\n"
+echo -e "\n2. Set an installed branding set as the current one to use.\n"
+echo -e "\n3. Install a new brand.\n"
+echo -e "\n\nq. Quit.\n"
+
+echo -e "$info\n\nThe currently installed brand is: $currentBrand\n\n\n"
+
+read mainMenuChoice
+
+case $mainMenuChoice in
+    
+	1)  listCurrent;;
+           
+	2)  setBrand;;
+           
+	3)  installNewBrand;;
+
+	q)  exit_fn;;
+        
+	*)  trollMsg;;
+
+esac
+
+}
+
+###########################
+
+function setBrand()
+{
+
+listCurrent
+
+_arrow
+echo -e "$q\nWhich branding set would you list to use (enter number from list)...\n\n"
+read brandAnswer
+
+clear
+_printPoweredBy
+_arrow
+echo -e "$info\nSetting brand...\n\n"
+
+newBrand=$(cat $brandsFile | tail -n+$brandAnswer | head -1 | awk '{print $1}')
+
+cp -f /var/www/dpportal/brands/$newBrand/* /var/www/dpportal/
+
+echo $newBrand > /etc/dpportal/config/current.conf
+
+systemctl reload apache2
+
+
+
+}
+
+###########################
+
+function trollMsg()
+{
+
+clear
+_printPoweredBy
+
+echo -e "$warn\n\n\n\n\nI don't know how but you fucked something up somewhere. Try harder next time!\n\n"
+_die "Someone's a JM...!"
+
+}
+
+###########################
+
+function createNewBrand()
+{
+
+#Standard header
+clear
+_printPoweredBy
+
+echo "$info\n\nLets get this new brand setup.\n\n"
+
+
+#Get user friendly name of company branding to use
+echo -e "$qWhat's the user friendly name (in proper case) of the company branding you're going to use? (e.g. Starbucks Coffee)"
+read newFriendlyName
+
+if [[ -z "$newFriendlyName" ]]; then
+	echo -e "$warn\nThis can't be blank! Bye now. Troll!"
+	_error "You done fucked up!"
+	sleep 3
+	mainMenu
+fi
+
+#Get shortname to use in folder naming
+echo -e "$qWhat's a shortname for the branding? This cannot contain special characters or spaces! (e.g. for Transport For London use TFL or londontransport etc.)"
+read newShortName
+
+if [[ -z "$newShortName" ]]; then
+	echo -e "$warnThis can't be blank! Bye now. Troll!"
+    _die "You done fucked up!"
+    sleep 3
+    clear
+    mainMenu
+fi
+
+_arrow
+
+#Get background image
+echo -e "$qPlease enter the full file path to a background image for the page in PNG or JPG form only(if it's not big enough, it will end up looking stretched!)\n\n"
+read newBrandGBI
+
+if [[ -z "$newBrandBGI" ]]; then
+	echo -e "$warnThis can't be blank! Bye now. Troll!"
+    _die "You done fucked up!"
+fi
+
+bgiFileType=$(identify $newBrandBGI | awk '{print $2}')
+
+if [[ "$bgiFileType" != "JPEG" && "$bgiFileType" != "PNG" ]]; then
+	echo -e "$warn\nFam it needs to be an image of the jpg or png variety.\n"
+    echo -e "$info\nSending you back to the main menu...\n"
+    sleep 5
+    mainMenu
+fi
+
+_arrow
+
+#Get logo image
+echo -e "$qPlease enter the full file path to a small logo/badge image for the new branding.\n\n"
+read newBrandLogo
+
+newBLType=$(identify $newBrandLogo | awk '{print $2}')
+
+if [[ -z "$newBrandLogo" ]]; then
+	echo -e "$warnThis can't be blank! Bye now. Troll!"
+    _die "You done fucked up!"
+fi
+
+if [[ "$newBLType" != "JPEG" && "newBLType" != "PNG" ]]; then
+	echo -e "$warn\nFam it needs to be an image of the jpg or png variety.\n"
+	echo -e "$info\nSending you back to the main menu...\n"
+	sleep 5
+	mainMenu
+fi
+
+#Make directory for brand
+mkdir -p /var/www/dpportal/brands/$newShortName
+
+#Copy images to new locations
+cp $newBrandBGI /var/www/dpportal/brands/$newShortName/
+cp $newBrandLogo /var/www/dpportal/brands/$newShortName/
+
+
+#Add brand to list file
+echo "$newShortName $NewFriendlyName" >> /etc/dpportal/config/brands.lst
+
+}
+
+#Single code line to start process
+mainMenu
