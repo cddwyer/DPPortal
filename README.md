@@ -142,6 +142,12 @@ or
 dp-portal --help
 ```
 
+## Legal fluff
+
+> [!CAUTION]
+> This tool is meant for educational purposes only, please do not use this on any people, locations or devices that you do not have prior expressed permission to do so with. Using this is any other way is illegal in the USA, UK, EU and most other territories around the world, I am not responsible for any irresponsible use of this tool.
+
+
 ## Author
 
 Double_D
