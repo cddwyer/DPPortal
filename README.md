@@ -159,7 +159,9 @@ Double_D
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. You're free to copy, edit or clone 
+any part of my code for your own educational benefit, just please dont plagurise 
+the project and claim credit for yourself, that's not cool.
 
 ## Acknowledgments
 
