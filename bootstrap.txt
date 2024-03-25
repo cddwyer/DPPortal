@@ -93,6 +93,7 @@ function ctrl_c()
 		fi
 		echo -n "."
 	done
+    systemctl reload apache2
 	clear
 	echo "$info\n\nIt's been emotional, see you later."
     exit 0

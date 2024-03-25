@@ -1,6 +1,6 @@
 # ***STILL UNDER DEVELOPMENT***
 
-## Dark Pal Portal
+## Double_D's Dark Phishing Portal
 
   _____  _____        _____   ____  _____ _______       _      
  |  __ \|  __ \      |  __ \ / __ \|  __ \__   __|/\   | |     
@@ -18,6 +18,9 @@ This is a phishing tool that deploys a wireless (802.11) network via access
 point software 'berate_ap' with a captive portal with customisable branding
 and logo, with multiple sign-in options available, all of which will harvest
 the credentials entered.
+
+> [!WARNING]
+> This project is still under development. You will notice that files that should be bash scripts are currently plain text files. I will save them as .sh files once developed to an acceptably functioning v1.0 and will remove this warning message.
 
 ## Description
 

@@ -25,6 +25,11 @@ export LANG=C
 #Check mysql binary exec location
 BIN_MYSQL=$(which mysql)
 
+#DB config file set
+configDir=/etc/dpportal/config
+touch $configDir/db.cfg
+dbcfgFile=$configDir/db.cfg
+
 #Generate random DB password
 function generatePassword()
 {
@@ -109,6 +114,12 @@ function createDBStuff()
         	clear
             _printPoweredBy
             echo -e "\n\n\n\n\n"
+            echo "host=$DB_HOST" > $dbcfgFile
+            echo "database=$DB_NAME" >> $dbcfgFile
+            echo "dbuser=$DB_USER" >> $dbcfgFile
+            echo "dbpass=$DB_PASS" >> dbcfg
+            clear
+            _printPoweredBy
             _success "Database $DB_NAME and user $DB_USER has been created."
         else
         	_error "There was a problem creating the database and/or user."
@@ -117,6 +128,10 @@ function createDBStuff()
 				if [ "$exitReply" = "y" ] | [ "$exitReply" = "Y" ]; then
                 	clear
                     _printPoweredBy
+					echo "host=$DB_HOST" > $dbcfgFile
+					echo "database=$DB_NAME" >> $dbcfgFile
+					echo "dbuser=$DB_USER" >> $dbcfgFile
+					echo "dbpass=$DB_PASS" >> dbcfg
                     echo -e "$info\n\nYou have chosen to exit, exiting....\n\n"
                     _safeExit
                 fi
@@ -132,6 +147,10 @@ function createDBStuff()
         	clear
             _printPoweredBy
             echo -e "\n\n\n\n\n"
+            echo "host=$DB_HOST" > $dbcfgFile
+            echo "database=$DB_NAME" >> $dbcfgFile
+            echo "dbuser=$DB_USER" >> $dbcfgFile
+            echo "dbpass=$DB_PASS" >> dbcfg
             _success "Database $DB_NAME and user $DB_USER has been created."
         else
         	_error "There was a problem creating the database and/or user."
