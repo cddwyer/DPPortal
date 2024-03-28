@@ -178,5 +178,5 @@ the project and claim credit for yourself, that's not cool.
 Inspiration, code snippets, etc.
 * [awesome-readme](https://github.com/matiassingers/awesome-readme)
 * [LitePhish](https://github.com/DarkSecsDevelopers/LitePhish) - Bot detection PHP script and various fake login page clones
-* [Pedz](For introducing me to bash/the UNIX command line in general.)
-* [Colin](For additional help and support developing my commandline skills.)
+* [Pedz] - For introducing me to bash/the UNIX command line in general.
+* [Colin] - For additional help and support developing my commandline skills.
