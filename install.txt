@@ -7,7 +7,6 @@ warn="\e[1;31m"      # warning (red)
 info="\e[1;34m"      # info (blue)
 q="\e[1;32m"         # questions (green)
 
-
 ###Some more colour and formatting vars, some may become redundant as I continue to dev and tidy up my project
 _bold=$(tput bold)
 _underline=$(tput sgr 0 1)
@@ -18,25 +17,49 @@ _green=$(tput setaf 76)
 _tan=$(tput setaf 3)
 _blue=$(tput setaf 38)
 
+#Check if running as root first
+scriptUser=$(id -u)
+if [[ $scriptUser -ne 0 ]]; then
+	echo -e "$warn\nThis script needs to be run with sudo privileges. Exiting, no changes have been made...\n"
+	exit 1
+fi
+
 #DB char set
 export LC_CTYPE=C
 export LANG=C
+
+echo -e "$info\nGathering some info...\n"
+
+#Define install dir
+installDir=$(echo $PWD)
+
+#Create base directories
+mkdir -p /etc/dpportal
+mkdir -p /etc/dpportal/run
+mkdir -p /etc/dpportal/config
+
+#Current user
+curUser=$(who | awk '{print $1}' | head -1)
 
 #Check mysql binary exec location
 BIN_MYSQL=$(which mysql)
 
 #DB config file set
 configDir=/etc/dpportal/config
+
+#Touch database config file
 touch $configDir/db.cfg
 dbcfgFile=$configDir/db.cfg
 
+
 #Generate random DB password
+
 function generatePassword()
 {
     echo "$(openssl rand -base64 12)"
 }
 
-#DB vars set calling random password generating function to set db password
+#DB vars set calling random password generator function to set db password
 DB_HOST='localhost'
 DB_NAME='dpportal'
 DB_USER='dpportaluser'
@@ -65,13 +88,6 @@ function _printPoweredBy()
 EOF
 }
 
-
-#Check if running as root first
-scriptUser=$(id -u)
-if [[ $scriptUser -ne 0 ]]; then
-	echo -e "$warn\nThis script needs to be run with sudo privileges. Exiting, no changes have been made...\n"
-	exit 1
-fi
 
 #Function that prints arrow then arguement (just bells and whistles)
 function _arrow()
@@ -117,7 +133,7 @@ function createDBStuff()
             echo "host=$DB_HOST" > $dbcfgFile
             echo "database=$DB_NAME" >> $dbcfgFile
             echo "dbuser=$DB_USER" >> $dbcfgFile
-            echo "dbpass=$DB_PASS" >> dbcfg
+            echo "dbpass=$DB_PASS" >> $dbcfgFile
             clear
             _printPoweredBy
             _success "Database $DB_NAME and user $DB_USER has been created."
@@ -131,7 +147,7 @@ function createDBStuff()
 					echo "host=$DB_HOST" > $dbcfgFile
 					echo "database=$DB_NAME" >> $dbcfgFile
 					echo "dbuser=$DB_USER" >> $dbcfgFile
-					echo "dbpass=$DB_PASS" >> dbcfg
+					echo "dbpass=$DB_PASS" >> $dbcfgFile
                     echo -e "$info\n\nYou have chosen to exit, exiting....\n\n"
                     _safeExit
                 fi
@@ -150,13 +166,17 @@ function createDBStuff()
             echo "host=$DB_HOST" > $dbcfgFile
             echo "database=$DB_NAME" >> $dbcfgFile
             echo "dbuser=$DB_USER" >> $dbcfgFile
-            echo "dbpass=$DB_PASS" >> dbcfg
+            echo "dbpass=$DB_PASS" >> $dbcfgFile
             _success "Database $DB_NAME and user $DB_USER has been created."
         else
         	_error "There was a problem creating the database and/or user."
             echo -e "$warn\nDo you want to exit the installer now or continue on with the install and troubleshoot the DB later?(y/n)\n"
             read exitReply
 			if [ "$exitReply" = "y" ] | [ "$exitReply" = "Y" ]; then
+				echo "host=$DB_HOST" > $dbcfgFile
+            	echo "database=$DB_NAME" >> $dbcfgFile
+            	echo "dbuser=$DB_USER" >> $dbcfgFile
+            	echo "dbpass=$DB_PASS" >> $dbcfgFile
                 clear
                 _printPoweredBy
                 echo -e "$info\n\nYou have chosen to exit, exiting....\n\n"
@@ -165,16 +185,6 @@ function createDBStuff()
         fi
     fi
 }
-
-echo -e "$info\nGathering some info...\n"
-#Define install dir
-installDir=$(echo $PWD)
-
-#Current user
-curUser=$(who | awk '{print $1}' | head -1)
-
-export LC_CTYPE=C
-export LANG=C
 
 function setHostsFile()
 {
@@ -245,35 +255,38 @@ function checkPreReqs()
 function installContent()
 {
 
-	#Create our app directories
-    mkdir -p /etc/dpportal
-    mkdir -p /etc/dpportal/config
-    mkdir -p /etc/dpportal/run
-    
     #Log directories and files
+    
     mkdir -p /var/log/apache2/dpportal
     mkdir -p /etc/dpportal/logs
     
-    #action moved to bootstrap functions '_pruneLogs()' and/or 'preFlight()'
+    # !! Action moved to bootstrap functions '_pruneLogs()' and/or 'preFlight()'
     #touch /etc/dpportal/logs/dpp-error.log
     #touch /etc/dpportal/logs/dpp-output.log
 	
 	#Install fake portal site content
+    
 	rsync -rlptgoD  $installDir/data/sites/* /var/www/
 
 	#Disable any current sites in Apache2
+    
     echo -e "$info\nDisabling existing sites running in Apache2\n"
     rm -rf /etc/apache2/sites-enabled/*
     systemctl reload apache2
     sleep 2
 
 	#Install site configs
+    
 	rsync -rlptgoD $installDir/config/sites/dpportal.conf /etc/apache2/sites-available/
 	rsync -rlptgoD $installDir/config/sites/dppoptions.conf /etc/apache2/sites-available/
     rsync -rlptgoD $installDir/config/sites/dppdisplay.conf /etc/apache2/sites-available/
-	a2ensite dpportal.conf
+	
+    # Enable sites and reload Apache service
+    
+    a2ensite dpportal.conf
 	a2ensite dppoptions.conf
     a2ensite dppdisplay.conf
+    systemctl reload apache2
     
 
 }
