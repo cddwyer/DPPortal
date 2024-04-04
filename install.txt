@@ -115,6 +115,16 @@ function _safeExit()
     exit 0
 }
 
+
+function getUserConsent()
+{
+
+echo -e "$infoThis will install DPPortal, all it's content and dependant packages, do you wish to continue? If not press control C, other with press any key to continue."
+read -s -n 1 "Waiting for key press..."
+
+}
+
+
 #Function to create database if it doesnt exist already and grabs root password if needed
 function createDBStuff()
 {
@@ -136,7 +146,7 @@ function createDBStuff()
             echo "dbpass=$DB_PASS" >> $dbcfgFile
             clear
             _printPoweredBy
-            _success "Database $DB_NAME and user $DB_USER has been created."
+            _success "Database $DB_NAME and user $DB_USER has been created with necessary permissions granted..."
         else
         	_error "There was a problem creating the database and/or user."
             echo -e "$warn\nDo you want to exit the installer now or continue on with the install and troubleshoot the DB later?(y/n)\n"
@@ -148,7 +158,7 @@ function createDBStuff()
 					echo "database=$DB_NAME" >> $dbcfgFile
 					echo "dbuser=$DB_USER" >> $dbcfgFile
 					echo "dbpass=$DB_PASS" >> $dbcfgFile
-                    echo -e "$info\n\nYou have chosen to exit, exiting....\n\n"
+                    echo -e "$info\n\nYou have chosen to exit, the database config file has been created with values but you still need to check MySQL/MariaDB, exiting....\n\n"
                     _safeExit
                 fi
         fi
@@ -167,7 +177,7 @@ function createDBStuff()
             echo "database=$DB_NAME" >> $dbcfgFile
             echo "dbuser=$DB_USER" >> $dbcfgFile
             echo "dbpass=$DB_PASS" >> $dbcfgFile
-            _success "Database $DB_NAME and user $DB_USER has been created."
+            _success "Database $DB_NAME and user $DB_USER has been created and necessary permissions have been granted..."
         else
         	_error "There was a problem creating the database and/or user."
             echo -e "$warn\nDo you want to exit the installer now or continue on with the install and troubleshoot the DB later?(y/n)\n"
@@ -179,7 +189,7 @@ function createDBStuff()
             	echo "dbpass=$DB_PASS" >> $dbcfgFile
                 clear
                 _printPoweredBy
-                echo -e "$info\n\nYou have chosen to exit, exiting....\n\n"
+                echo -e "$info\n\nYou have chosen to exit, but the database config file has been created with values, you still need to check MySQL/MariaDB, exiting....\n\n"
                 _safeExit
             fi
         fi
@@ -189,7 +199,7 @@ function createDBStuff()
 function setHostsFile()
 {
 	
-    #Copy Hosts file
+    #Copy Hosts file and preserve current POSIX permissions
     cp --preserve /etc/hosts /etc/dpportal/config/dpphosts
     
     #Add our sites to hosts file

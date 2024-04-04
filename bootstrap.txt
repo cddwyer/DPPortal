@@ -9,6 +9,19 @@
 #Custom hosts file
 dppHosts="/etc/dpportal/config/dpphosts"
 
+#Quick start config file path
+quickStartFile="/etc/dpportal/config/quickstart.cfg"
+
+#Set quick start vars as blank
+useSSID=""
+useInt=""
+useChan=""
+useFreq=""
+useBSSID=""
+useDriver=""
+useShowClients=""
+useType=""
+
 ##Colours and formatting for stdOut and stdErr
 warn="\e[1;31m"      # warning (red)
 info="\e[1;34m"      # info (blue)
@@ -100,6 +113,78 @@ function ctrl_c()
 
 }
 
+function configExists()
+{
+	dppOutLog="/etc/dpportal/logs/$dppOutLogName"
+	dppErrLog="/etc/dpportal/logs/$dppErrLogName"
+	if [[ -f "$quickStartFile" ]]; then
+    	if [[ -r "$quickStartFile" ]]; then
+        	quickExists=1
+            loadQuickStart
+        else
+        	echo "Cannot read values from config file" >> $dppErrLog
+        	_error "Quick start file exists but is not readable."
+        fi
+	else
+    	quickExists=0
+	fi
+}
+
+function loadQuickStart()
+{
+
+	#Get values from quick start file
+	if [[ "$quickExists" -eq 1 ]]; then
+    	qFile=/etc/dpportal/config/quickstart.cfg
+	else
+    	echo "Quick start config file doesn't exist."  >> $dppErrLog
+        _die "You tried to start with a quick start config file that doesn't exist! Weirdo."
+	fi
+    
+    #Set hard opts and args
+	allOptsArgs="-e $dppHosts -n --redirect-to-localhost"
+	
+    #Check vars aren't null or white space then add to the opts/args string
+    if [[ ! -z "$useChan" -a "$useChan" != " " ]]; then
+		allOptsArgs+=" -c $useChan"
+	fi
+    
+    if [[ ! -z "$useFreq" -a "$useFreq" != " " ]]; then
+		allOptsArgs+=" --freq-band $useFreq"
+	fi
+
+	if [[ ! -z "$useBSSID" -a "$useBSSID" != " " ]]; then
+		allOptsArgs+=" --mac $useBSSID"
+	fi
+	
+    if [[ ! -z "$useDriver" -a "$useDriver" != " " ]]; then
+		allOptsArgs+=" --driver $useDriver"
+	fi
+    
+	if [[ ! -z "$useShowClients" -a "$useShowClients" != " " ]]; then
+		openClients=1
+	fi
+    
+    #Set one wifi type only
+	if [[ ! -z "$useType" -a "$useType" != " " ]]; then
+		
+        if [[ "$useType" == "AC" ]]; then
+        	allOptsArgs+=" --ieee80211ac"
+		fi
+        
+        if [[ "$useType" == "N" ]]; then
+        	allOptsArgs+=" --ieee80211n"
+        fi
+    fi
+    allOptsArgs+=" $useInt $useSSID"
+    
+
+}
+
+
+
+
+
 function _printPoweredBy()
 {
     cat <<"EOF"
@@ -125,90 +210,98 @@ sleep 1
 }
 
 
-function processArgs()
+function askQuestions()
 {
 	#Set hard arguements
-    allOptsArgs="$dppHosts -n --redirect-to-localhost"
+    allOptsArgs=" -e $dppHosts -n --redirect-to-localhost"
     useWifiT=0
-    # Parse soft arguments
-    for arg in "$@"
-    do
-        case $arg in
-            -s=*|--ssid=*)
-                ssidName="${arg#*=}"
-            ;;
-            -i=*|--interface=*)
-                wifiInt="${arg#*=}"
-            ;;
-            -c=*|--channel=*)
-                wifiChan="${arg#*=}"
-                allOptsArgs+=" -c $wifiChan"
-            ;;
-            -f=*|--frequency=*)
-                wifiFreq="${arg#*=}"
-                allOptsArgs+=" --freq-band $wifiFreq"
-			;;
-			-b=*|--bssid=*)
-				wifiBSSID="${arg#*=}"
-                allOptsArgs+=" --mac $wifiBSSID"
-            ;;
-            -d=*|--driver=*)
-            	nicDriver="${arg#*=}"
-                allOptsArgs+=" --driver $nicDriver"
-            ;;
-            -s|--show-mugs)
-                showClients=1
-			;;
-			--ieee80211n)
-				useWifiT=1
-			;;
-			--ieee802111ac)
-            	if [[ $useWifiT -eq 1 ]]; then
-                	useWifiT=3
-				else
-                	useWifiT=2
-                fi
-            ;;
-            -h|--help)
-                printUsage()
-            ;;
-            *)
-                printUsage()
-            ;;
-        esac
-    done
-	
-	if [[ -z "$ssidName" ]]; then
+    #Set optional args and opts
+  
+	echo "What would you like to call this network? e.g. Free Wifi (required)"
+	read useSSID
+    
+	if [[ -z "$useSSID" ]]; then
 		echo -e "$warn\n\nYou must specify an SSID..! Come on, think!\n"
-		exit 1
+		_die "I'm off pal!"
 	fi
 	
-	if [[ -z "$wifiInt" ]]; then
-		echo -e "$warn\n\nHow could this work without you specifying a Wi-Fi interface!? Daft melt! \n"
-		exit 1
+    echo "Which interface are you using for the AP? e.g. wlan0 (required)"
+	read useInt
+    
+	if [[ -z "$useInt" ]]; then
+		echo -e "$warn\n\nYou must specify a valid interface..! Come on, think!\n"
+		_die "I'm off pal!"
+	fi
+    
+    echo "What channel would you like to run the AP on? (optional)"
+	read useChan
+
+ 	if [[ ! -z "$useChan" -a "$useChan" != " " ]]; then
+		allOptsArgs+=" -c $useChan"
 	fi
 
-    if [[ $useWifiT -eq 3 ]] then
-    	echo -e "$warn\nYou can't use 802.11n and 802.11ac at the same time! Daft bastard!\n\n"
-        _safeExit
-    elif [[ $useWifiT -eq 2 ]]; then
-    	allOptsArgs+=" --iee80211ac"
-    elif [[ $useWifiT -eq 1 ]]; then
-    	allOptsArgs+=" --iee80211n"
+	echo "Which frequency band would you like to use? [5|2.4] (default: 2.4)"
+	read useFreq
+    
+	if [[ ! -z "$useFreq" -a "$useFreq" != " " ]]; then
+		allOptsArgs+=" --freq-band $useFreq"
+	fi
+    
+    echo "Would you like to specify a BSSID for the AP? (optional)"
+	read useBSSID
+    
+	if [[ ! -z "$useBSSID" -a "$useBSSID" != " " ]]; then
+		allOptsArgs+=" --mac $useBSSID"
+	fi
+    
+	echo "Would you like to specify a driver to use for the network interface? (default: nl80211)"
+	read useDriver
+    
+    if [[ ! -z "$useDriver" -a "$useDriver" != " " ]]; then
+		allOptsArgs+=" --driver $useDriver"
+	fi
+    
+    echo "Would you like to show a pop up eTerm window listing the clients as they connect? (optional)"
+	read useShowClients
+    
+	if [[ ! -z "$useShowClients" -a "$useShowClients" != " " ]]; then
+		openClients=1
+	fi
+    
+    echo "Would you like to specify a Wi-Fi standard to use? (AC or N)"
+	read useType
+    
+	if [[ "$useType" != "AC" && "$useType" != "N" ]]; then
+		_error "That wasn't a valid Wi-Fi standard, the options are AC or N"
+    	_die "Closing down..."
+	fi
+
+	#Set one wi-fi standard only
+	if [[ "$useType" == "AC" ]]; then
+		allOptsArgs+=" --ieee80211ac"
+	fi
+
+	if [[ "$useType" == "N" ]]; then
+		allOptsArgs+=" --ieee80211n"
+        fi
     fi
-
-preFlight
-
-
+    
+    #Set final hard args
+    allOptsArgs+=" $useInt $useSSID"
+    
+    startBerate
+    
 }
 
 
 function printUsage()
 {
-	#clear
+
+	clear
 	_printPoweredBy
 	echo -e "$info\nTo use this tool, run:\n\n\n\ndp_portal [OPTIONS] <Desired SSID> <Wi-Fi Interface>\n\n#######################################"
 	_safeExit
+
 }
 
 function postFlight()
@@ -218,9 +311,9 @@ function postFlight()
     _printPoweredBy
     
     #If user wants it, show connected clients as and when they connect
-    if [[ $showClients -eq 1 ]]; then
+    if [[ "$openClients" -eq 1 ]]; then
     	#Not sure if this is one one-off list output or a live tail - may need to modify to update list every couple of seconds or something
-    	Eterm -g 80x8-0+225 --pointer-color "dark orange" -f DarkOrchid4 -b LightYellow1 -r --font-fx none --buttonbar 0  --scrollbar 0 -q -T "List of mugs as they connect to our roastathon..." -e berate_ap --list-clients $wifiInt 2> /dev/null &
+    	Eterm -g 80x8-0+225 --pointer-color "dark orange" -f DarkOrchid4 -b LightYellow1 -r --font-fx none --buttonbar 0  --scrollbar 0 -q -T "List of mugs as they connect to our roastathon..." -e berate_ap --list-clients $thisBeratePID 2> /dev/null &
 	fi
 	
     #show running message
@@ -232,8 +325,9 @@ function postFlight()
 function _pruneLogs()
 {
 
-#Delete logs older than 7 days
-find /etc/dpportal/logs/ -mtime +7 -type f -exec rm {} \;
+	#Delete logs older than 7 days
+	echo "Pruning logs..." >> $dppOutLog
+	find /etc/dpportal/logs/ -mtime +7 -type f -exec rm {} \; > $dppOutLog 2> $dppErrLog
 
 }
 
@@ -241,19 +335,19 @@ find /etc/dpportal/logs/ -mtime +7 -type f -exec rm {} \;
 function _preFlight()
 {
 
-_pruneLogs
+	_pruneLogs
 
-#set log files
-dStamp=$(date '+%Y%m%d%H%M%S')
+	#set log files
+	dStamp=$(date '+%Y%m%d%H%M%S')
 
-dppErrLogName="DPP_Error_$dStamp.log"
-dppOutLogName="DPP_Output_$dStamp.log"
+	dppErrLogName="DPP_Error_$dStamp.log"
+	dppOutLogName="DPP_Output_$dStamp.log"
 
-touch /etc/dpportal/logs/$dppErrLogName
-touch /etc/dpportal/logs/$dppOutLogName
+	touch /etc/dpportal/logs/$dppErrLogName
+	touch /etc/dpportal/logs/$dppOutLogName
 
-dppOutLog="/etc/dpportal/logs/$dppOutLogName"
-dppErrLog="/etc/dpportal/logs/$dppErrLogName"
+	dppOutLog="/etc/dpportal/logs/$dppOutLogName"
+	dppErrLog="/etc/dpportal/logs/$dppErrLogName"
 
 }
 
@@ -261,24 +355,50 @@ dppErrLog="/etc/dpportal/logs/$dppErrLogName"
 function startBerate()
 {
 
-#Run preflight function
-_preFlight
+	#Starts berate_ap process with user defined arguements and options outputing stdout and stderr to separate files
+	berate_ap $allOptsArgs > $dppOutLog 2> $dppErrLog &
 
-#Starts berate_ap process with user defined arguements and options outputing stdout and stderr to separate files
-berate_ap $allOptsArgs > $dppOutLog 2> $dppErrLog &
-
-thisBeratePID=$(echo $!)
-postFlight
+	thisBeratePID=$(echo $!)
+	postFlight
 
 }
 
 function welcomeAll()
 {
 
-clear
-_printPoweredBy
-processArgs
+	clear
+	_printPoweredBy
+	_preFlight
+    configExists
+    if [[ "$quickExists" -eq 1 ]]; then
+    	loadQuickStart
+    	echo -e "$infoIt looks like there is a config file in place with the values you used last time. Woud you like to start DPPortal with these settings (y/n) ...if not you will be asked to configure these options:\n\n"
+        echo "SSID: $useSSID"
+		echo "Interface: $useInt"
+		echo "Channel: $useChan"
+		echo "Frequency band: $useFreq"
+		echo "BSSID: $useBSSID"
+		echo "Driver: $useDriver"
+		if [[ "$useShowClients" -eq 1 ]]; then
+        	echo "Tail connected clients log: Yes"
+        else
+        	echo "Tail connected clients log: No"
+        fi
+		echo "Wi-Fi Standard: $useType"
+		echo "Use these options (y/n)"
+        read quickAnswer
+        if [[ "$quickAnswer" == "y" ]]; then
+        	goingQuick=1
+        	startBerate
+        elif [[ "$quickAnswer" == "n" ]]; then
+        	goingQuick=0
+            askQuestions
+		fi
+	else
+    	askQuestions
+	fi
 
 }
 
+#Single line that starts program
 welcomeAll

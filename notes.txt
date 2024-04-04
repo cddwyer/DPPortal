@@ -2,10 +2,14 @@ TO DO LIST
 
 BOOTSTRAP SCRIPT
 
+-Build in option for config file quick start - Done!!!
+
+-Change process args to series of questions - askQuestions() - Done!!!
+
+-Create config file
 
 
-
-SET BRAND SCRIPT
+SET BRAND SCRIPT - Done, to be tested fully
 
 listCurrent - Done!!
 
@@ -23,7 +27,7 @@ INSTALL SCRIPT
 
 
 
-UNINSTALL SCRIPT
+UNINSTALL SCRIPT - Done and tested!
 
 Done!!!!!
 
