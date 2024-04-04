@@ -95,7 +95,7 @@ function has-space {
 brandsFile=/etc/dpportal/config/brands.lst
 portalWebDir=/var/www/dpportal/
 currentBrand=$(cat /etc/dpportal/config/current.conf)
-currentBrandF=$(cat /etc/dpportal/config/brands.lst | grep $currentBrand | awk '{print $1=""; $0}')
+currentBrandF=$(cat $brandsFile | grep $currentBrand | awk '{$(NF--)=""; print}')
 
 
 ###########List installed branding for Captive portal##################
@@ -109,7 +109,19 @@ function listCurrent()
 	_printPoweredBy
 	_arrow
 	echo -e "$infoList of installed branding by the short name.\n\n"
-	cat -n $brandsFile | awk '{print $2=""; $0}'
+	cat -n $brandsFile | awk '{$(NF--)=""; print}'
+    _arrow "Press any key when you are ready to return to the main menu."
+    read -s -n 1 "Waiting for key press..."
+    mainMenu
+
+}
+
+function showCurrent()
+{
+
+	_arrow
+	echo -e "$infoList of installed branding by the short name.\n\n"
+	cat -n $brandsFile | awk '{$(NF--)=""; print}'
 
 }
 
@@ -155,26 +167,44 @@ function mainMenu()
 function setBrand()
 {
 
-	listCurrent
+	#Shows list of currently installed brandings with corresponding line numbers
+	showCurrent
 	_arrow
 	echo -e "$qWhich branding set would you list to use (enter number from list)...\n\n"
-	read brandAnswer
-	clear
+	
+    #Reads number input from user
+    read brandAnswer
+	
+    #Refresh screen display
+    clear
 	_printPoweredBy
 	_arrow
 	echo -e "$infoSetting brand...\n\n"
-	chosenBrand=$(cat $brandsFile | tail -n+$brandAnswer | head -1 | awk '{print $1}')
-    chosenBrandF=$(cat $brandsFile | tail -n+$brandAnswer | head -1 | awk '{print $1=""; $0}')
-	cp -f /var/www/dpportal/brands/$chosenBrand/* /var/www/dpportal/
+	#Gets brand short name from file
+    chosenBrand=$(cat $brandsFile | tail -n+$brandAnswer | head -1 | awk '{print $NF}')
+    #Gets brand full name from file
+    chosenBrandF=$(cat $brandsFile | tail -n+$brandAnswer | head -1 | awk '{$(NF--)=""; print}')
+	
+    #Copies across site contents
+    cp -f /var/www/dpportal/brands/$chosenBrand/* /var/www/dpportal/
     cp -f /var/www/dpportal/brands/indextemplate.html /var/www/dpportal/index.html
     cd /var/www/dpportal
+    
+    #Sets full name in index file template
     sed -i "s/COMPANYNAME/$chosenBrandF/g" index.html
+    
+    #Puts short name into current brand config file
 	echo $chosenBrand > /etc/dpportal/config/current.conf
-	systemctl reload apache2
+	
+    #Reloads apache and screen display
+    systemctl reload apache2
 	sleep 2
     clear
     _printPoweredBy
-    echo -e "$infoThe branding has been successfully set to $chosenBrandF.\n\nThank you."
+    _arrow
+    
+    #Notifies user and exits
+    echo -e "$infoThe branding has been successfully set to $chosenBrandF.\n\nThank you, you can now run DPPortal with your new branding setup."
     sleep 1.5
     _safeExit
 
@@ -187,8 +217,9 @@ function trollMsg()
 
 	clear
 	_printPoweredBy
-
-	echo -e "$warn\n\n\n\n\nI don't know how, but you fucked up a simple menu choice. Try harder next time!\n\n"
+	
+    #Kicks user out of script for unexpected menu choice displaying an in-joke from my first IT job that no one else will get
+	echo -e "$warn\n\n\nI don't know how, but you fucked up a simple menu choice. Try harder next time!\n\n"
 	_die "Someone's a JM...!"
 
 }
@@ -222,7 +253,7 @@ function createNewBrand()
 
 	if [[ -z "$newShortName" ]]; then
 		echo -e "$warnThis can't be blank! Bye now. Troll!"
-	    _die "You done fucked up!"
+	    _error "You done fucked up!"
 	    sleep 3
 	    clear
 	    mainMenu
@@ -241,19 +272,21 @@ function createNewBrand()
 	_arrow
 
 	#Get background image
-	echo -e "$qPlease enter the full file path to a background image for the page in PNG or JPG form only(if it's not big enough, it will end up looking stretched!)\n\n"
+	echo -e "$qPlease enter the full file path to a background image for the page in PNG or JPG form only(if it's not big enough, it will end up looking stretched! e.g. /home/me/pic.png)\n\n"
 	read chosenBrandGBI
 
+	#Check path not empty string
 	if [[ -z "$chosenBrandBGI" ]]; then
 		echo -e "$warnThis can't be blank! Bye now. Troll!"
 	    _die "You done fucked up!"
 	fi
 
+	#Check file type
 	bgiFileType=$(identify $chosenBrandBGI | awk '{print $2}')
 
 	if [[ "$bgiFileType" != "JPEG" && "$bgiFileType" != "PNG" ]]; then
-		echo -e "$warn\nFam it needs to be an image of the jpg or png variety.\n"
-	    echo -e "$info\nSending you back to the main menu...\n"
+		echo -e "$warn\nFam it needs to be an image that exists, of the jpg or png variety.\n"
+	    echo -e "$info\nSending you back to the main menu in 5 seconds...\n"
 	    sleep 5
 	    mainMenu
 	fi
@@ -264,17 +297,19 @@ function createNewBrand()
 	echo -e "$qPlease enter the full file path to a small logo/badge image for the new branding. e.g. /path/to/image.jpg\n\n"
 	read chosenBrandLogo
 
-	newBLType=$(identify $chosenBrandLogo | awk '{print $2}')
+	
 
 	if [[ -z "$chosenBrandLogo" ]]; then
 		echo -e "$warnThis can't be blank! Bye now. Troll!"
 	    _die "You done fucked up!"
 	fi
+    
+    newBLType=$(identify $chosenBrandLogo | awk '{print $2}')
 
 	if [[ "$newBLType" != "JPEG" && "newBLType" != "PNG" ]]; then
-		echo -e "$warn\nFam it needs to be an image of the jpg or png variety.\n"
-		echo -e "$info\nSending you back to the main menu...\n"
-		sleep 3.5
+		echo -e "$warn\nFam it needs to be an image that exists, of the jpg or png variety.\n"
+		echo -e "$info\nSending you back to the main menu in 5 seconds...\n"
+		sleep 5
 		mainMenu
 	fi
 
@@ -288,6 +323,7 @@ function createNewBrand()
 
 	#Add brand to list file
 	echo "$newShortName $NewFriendlyName" >> /etc/dpportal/config/brands.lst
+    
 
 }
 

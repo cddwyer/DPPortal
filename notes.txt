@@ -1,3 +1,39 @@
+TO DO LIST
+
+BOOTSTRAP SCRIPT
+
+
+
+
+SET BRAND SCRIPT
+
+listCurrent - Done!!
+
+setBrand - Done!! - Although add chmod for web content
+
+installNewBrand - Done!!
+	
+safeExit - Done!!
+        
+trollMsg - Done!!
+
+
+INSTALL SCRIPT
+
+
+
+
+UNINSTALL SCRIPT
+
+Done!!!!!
+
+
+
+
+
+
+
+
 ################Host file
 
 Host file now separate to system one in:

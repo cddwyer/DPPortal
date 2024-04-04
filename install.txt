@@ -288,6 +288,10 @@ function installContent()
     a2ensite dppdisplay.conf
     systemctl reload apache2
     
+    #Make binary sym link
+    
+    ln -s /etc/dpportal/run/dpportal.sh /usr/bin/dpportal
+    
 
 }
 

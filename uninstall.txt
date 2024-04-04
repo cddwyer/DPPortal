@@ -58,9 +58,35 @@ _printPoweredBy
 _arrow "Disabling sites..."
 sleep 0.5
 
+_arrow "Disabling portal..."
 a2dissite dpportal.conf
+sleep 1.5
+if [[ $? -eq 0 ]]; then
+	clear
+    _printPoweredBy
+	_success "Portal Disabled."
+else
+	_error "Something went wrong there, check Apache sites yourself!"
+fi
+
+_arrow "Disabling login options site..."
 a2dissite dppoptions.conf
+if [[ $? -eq 0 ]]; then
+	clear
+    _printPoweredBy
+	_success "Options site Disabled."
+else
+	_error "Something went wrong there, check Apache sites yourself!"
+fi
+_arrow "Disabling admin panel site..."
 a2dissite dppdisplay.conf
+if [[ $? -eq 0 ]]; then
+	clear
+    _printPoweredBy
+	_success "Admin Panel Site Disabled."
+else
+	_error "Something went wrong there, check Apache sites yourself!"
+fi
 
 sleep 2
 
@@ -72,7 +98,7 @@ systemctl reload apache2
 
 sleep 1
 
-_arrow "Removing site ocnfig files"
+_arrow "Removing site config files"
 #Remove site config files
 rm -f /etc/apache2/sites-available/dpportal.conf
 rm -f /etc/apache2/sites-available/dppoptions.conf
