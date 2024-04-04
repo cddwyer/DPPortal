@@ -1,4 +1,8 @@
-## Try this first
+
+
+# Try this first
+
+###Credit to Sensepost for this information. Taken from the berate_ap github main branch.
 
 If you are facing any problems with Realtek adapters (e.g. Edimax EW-7811Un)
 first try to run create_ap with `-w 2` (i.e. use WPA2 only) or use it
