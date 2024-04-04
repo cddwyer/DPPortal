@@ -117,16 +117,13 @@ function configExists()
 {
 	dppOutLog="/etc/dpportal/logs/$dppOutLogName"
 	dppErrLog="/etc/dpportal/logs/$dppErrLogName"
-	if [[ -f "$quickStartFile" ]]; then
-    	if [[ -r "$quickStartFile" ]]; then
-        	quickExists=1
-            loadQuickStart
-        else
-        	echo "Cannot read values from config file" >> $dppErrLog
-        	_error "Quick start file exists but is not readable."
-        fi
+	if [[ -r "$quickStartFile" ]]; then
+        quickExists=1
+		loadQuickStart
 	else
-    	quickExists=0
+		echo "Cannot read values from config file or file does not exist" >> $dppErrLog
+		_error "Quick start file doesn't exist or is not readable."
+        quickExists=0
 	fi
 }
 
@@ -141,32 +138,42 @@ function loadQuickStart()
         _die "You tried to start with a quick start config file that doesn't exist! Weirdo."
 	fi
     
-    #Set hard opts and args
+    #Get values from config file and put them into vars
+	useSSID=$(cat $qFile | grep '^SSID' | sed 's/SSID=//g')
+	useInt=$(cat $qFile | grep '^INTERFACE' | sed 's/INTERFACE=//g')
+	useChan=$(cat $qFile | grep '^CHANNEL' | sed 's/CHANNEL=//g')
+	useFreq=$(cat $qFile | grep '^FREQUENCY' | sed 's/FREQUENCY=//g')
+	useBSSID=$(cat $qFile | grep '^BSSID' | sed 's/BSSID=//g')
+	useDriver=$(cat $qFile | grep '^DRIVER' | sed 's/DRIVER=//g')
+	useShowClients=$(cat $qFile | grep '^SHOWCLIENTS' | sed 's/SHOWCLIENTS=//g')
+	useType=$(cat $qFile | grep '^USETYPE' | sed 's/USETYPE=//g')
+    
+    #Set initial hard opts and args
 	allOptsArgs="-e $dppHosts -n --redirect-to-localhost"
 	
     #Check vars aren't null or white space then add to the opts/args string
-    if [[ ! -z "$useChan" -a "$useChan" != " " ]]; then
+    if [[ ! -z "$useChan" && "$useChan" != " " ]]; then
 		allOptsArgs+=" -c $useChan"
 	fi
     
-    if [[ ! -z "$useFreq" -a "$useFreq" != " " ]]; then
+    if [[ ! -z "$useFreq" && "$useFreq" != " " ]]; then
 		allOptsArgs+=" --freq-band $useFreq"
 	fi
 
-	if [[ ! -z "$useBSSID" -a "$useBSSID" != " " ]]; then
+	if [[ ! -z "$useBSSID" && "$useBSSID" != " " ]]; then
 		allOptsArgs+=" --mac $useBSSID"
 	fi
 	
-    if [[ ! -z "$useDriver" -a "$useDriver" != " " ]]; then
+    if [[ ! -z "$useDriver" && "$useDriver" != " " ]]; then
 		allOptsArgs+=" --driver $useDriver"
 	fi
     
-	if [[ ! -z "$useShowClients" -a "$useShowClients" != " " ]]; then
+	if [[ ! -z "$useShowClients" && "$useShowClients" != " " ]]; then
 		openClients=1
 	fi
     
     #Set one wifi type only
-	if [[ ! -z "$useType" -a "$useType" != " " ]]; then
+	if [[ ! -z "$useType" && "$useType" != " " ]]; then
 		
         if [[ "$useType" == "AC" ]]; then
         	allOptsArgs+=" --ieee80211ac"
@@ -236,35 +243,35 @@ function askQuestions()
     echo "What channel would you like to run the AP on? (optional)"
 	read useChan
 
- 	if [[ ! -z "$useChan" -a "$useChan" != " " ]]; then
+ 	if [[ ! -z "$useChan" && "$useChan" != " " ]]; then
 		allOptsArgs+=" -c $useChan"
 	fi
 
 	echo "Which frequency band would you like to use? [5|2.4] (default: 2.4)"
 	read useFreq
     
-	if [[ ! -z "$useFreq" -a "$useFreq" != " " ]]; then
+	if [[ ! -z "$useFreq" && "$useFreq" != " " ]]; then
 		allOptsArgs+=" --freq-band $useFreq"
 	fi
     
     echo "Would you like to specify a BSSID for the AP? (optional)"
 	read useBSSID
     
-	if [[ ! -z "$useBSSID" -a "$useBSSID" != " " ]]; then
+	if [[ ! -z "$useBSSID" && "$useBSSID" != " " ]]; then
 		allOptsArgs+=" --mac $useBSSID"
 	fi
     
 	echo "Would you like to specify a driver to use for the network interface? (default: nl80211)"
 	read useDriver
     
-    if [[ ! -z "$useDriver" -a "$useDriver" != " " ]]; then
+    if [[ ! -z "$useDriver" && "$useDriver" != " " ]]; then
 		allOptsArgs+=" --driver $useDriver"
 	fi
     
     echo "Would you like to show a pop up eTerm window listing the clients as they connect? (optional)"
 	read useShowClients
     
-	if [[ ! -z "$useShowClients" -a "$useShowClients" != " " ]]; then
+	if [[ ! -z "$useShowClients" && "$useShowClients" != " " ]]; then
 		openClients=1
 	fi
     
@@ -286,9 +293,21 @@ function askQuestions()
         fi
     fi
     
-    #Set final hard args
+    #Write vars to config file
+    configFile=/etc/dpportal/config/quickstart.cfg
+    echo "SSID=$useSSID" > $configFile
+    echo "INTERFACE=$useInt" >> $configFile
+    echo "CHANNEL=$useChan" >> $configFile
+    echo "FREQUENCY=$useFreq" >> $configFile
+    echo "BSSID=$useBSSID" >> $configFile
+    echo "DRIVER=$useDriver" >> $configFile
+    echo "SHOWCLIENTS=$useShowClients" >> $configFile
+    echo "USETYPE=$useType" >> $configFile
+
+    #Set final required args
     allOptsArgs+=" $useInt $useSSID"
     
+    #Kick off the function to start berate_ap
     startBerate
     
 }
@@ -299,7 +318,6 @@ function printUsage()
 
 	clear
 	_printPoweredBy
-	echo -e "$info\nTo use this tool, run:\n\n\n\ndp_portal [OPTIONS] <Desired SSID> <Wi-Fi Interface>\n\n#######################################"
 	_safeExit
 
 }
@@ -355,11 +373,14 @@ function _preFlight()
 function startBerate()
 {
 
-	#Starts berate_ap process with user defined arguements and options outputing stdout and stderr to separate files
+	#Starts berate_ap process with user defined arguements and options outputing stdout and stderr to separate custom files
 	berate_ap $allOptsArgs > $dppOutLog 2> $dppErrLog &
 
+	#Put berate_ap's process ID into a var
 	thisBeratePID=$(echo $!)
-	postFlight
+	
+    
+    postFlight
 
 }
 
