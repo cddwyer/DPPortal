@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#####Setting vars and spitting bars#####
+#####Setting varz and spitting barz#####
 
 #Set sciptempls for colouring echo lines
 warn="\e[1;31m"      # warning (red)
