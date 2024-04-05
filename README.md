@@ -74,20 +74,23 @@ GNU Bash v5.x+, PHP v7.x+
 
 #### Package Dependencies
 
-*berate_ap 
-*eterm
-*airmon-ng
-*LAMP (Linux, Apache2, MySQL and PHP)
-*git (obvs) 
-*hostapd-mana
-*bash
-*util-linux
-*procps or procps-ng
-*iproute2
-*iw
-*iwconfig (only if 'iw' doesn't recognise your attached W-NIC)
-*dnsmasq
-*iptables
+* berate_ap 
+* eterm
+* airmon-ng
+* Apache2 
+* MySQL/MariaDB
+* PHP7
+* hostapd-mana
+* bash
+* util-linux
+* procps or procps-ng
+* iproute2
+* iw
+* iwconfig (only if 'iw' doesn't recognise your attached W-NIC)
+* dnsmasq
+* iptables
+
+* Appropriate drivers for your NIC
 
 
 ### Installation
