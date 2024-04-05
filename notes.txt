@@ -1,19 +1,27 @@
 TO DO LIST
 
+
+WEB STUFF
+
+https://serverfault.com/questions/679393/captive-portal-popups-the-definitive-guide
+
+
 BOOTSTRAP SCRIPT
+
+-Look into multiple domains in hosts for localhost redirect to portal first before other sites!! - Move Litephish into captive portal web folder and adjust links to keep same domain
 
 -Build in option for config file quick start - Done!!!
 
 -Change process args to series of questions - askQuestions() - Done!!!
 
--Create config file
+-Create config file - Done!!!
 
 
 SET BRAND SCRIPT - Done, to be tested fully
 
 listCurrent - Done!!
 
-setBrand - Done!! - Although add chmod for web content
+setBrand - Done!! - Although add chown/chmod for web content
 
 installNewBrand - Done!!
 	
@@ -24,10 +32,11 @@ trollMsg - Done!!
 
 INSTALL SCRIPT
 
+-Change site installation to reflect merged options and portal sites and hosts!
 
 
 
-UNINSTALL SCRIPT - Done and tested!
+UNINSTALL SCRIPT - Done and tested! 
 
 Done!!!!!
 

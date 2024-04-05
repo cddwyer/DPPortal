@@ -202,8 +202,10 @@ function setHostsFile()
     #Copy Hosts file and preserve current POSIX permissions
     cp --preserve /etc/hosts /etc/dpportal/config/dpphosts
     
+    sleep 0.5
+    
     #Add our sites to hosts file
-	sed -i '/^127.0.0.1*/a 127.0.0.1\	portal.dpportal.co.uk\n127.0.0.1\	captive.dpportal.co.uk\n127.0.0.1\	display.dpportal.co.uk' /etc/dpportal/config/dpphosts
+	sed -i '/^127.0.0.1*/a 127.0.0.1\	captive.dpportal.co.uk\n127.0.1.2\	display.dpportal.co.uk' /etc/dpportal/config/dpphosts
 	sleep 1
 }
 
