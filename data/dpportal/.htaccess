@@ -1,0 +1,11 @@
+# apple
+RewriteEngine on
+RewriteCond %{HTTP_USER_AGENT} ^CaptiveNetworkSupport(.*)$ [NC]
+RewriteCond %{HTTP_HOST} !^captive.bunnin.co.uk$
+RewriteRule ^(.*)$ http://captive.bunnin.co.uk/index.html [L,R=302]
+
+# android
+RedirectMatch 302 /generate_204 http://captive.bunnin.co.uk/index.html
+
+# windows
+RedirectMatch 302 /ncsi.txt http://captive.bunnin.co.uk/index.html
