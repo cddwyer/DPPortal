@@ -32,12 +32,12 @@ presented with a captive portal offering various different login options of
 various social media networks and services. The currently installed options
 are:
 
-Facebook
-Google/GMail
-Instagram
-Microsoft Office 365
-Yahoo
-Twitter
+* Facebook
+* Google/GMail
+* Instagram
+* Microsoft Office 365
+* Yahoo
+* Twitter
 
 These are all cloned pages with the login mechanism modified to steal the 
 credentials entered all login details will be added to a MySQL database on
@@ -50,7 +50,9 @@ There is a 'Display Panel' page. The display panel you can access will show
 pull all of the database entries created from our phishing portals and load
 them into a HTML table showing you the attempted login, with columns for the
 username, password, date/time stamp of the entry and the page/service used in
-the attempt.
+the attempt. It is protected by digest authentication. The username is 'pwner'
+and the password you will be asked to configure during the installation
+process.
 
 
 ## Branding Configuration
@@ -67,7 +69,7 @@ menu in the previous step.
 ## Installing and running DPPortal
 
 ### Operating System Requirements
-* This has been tested on Kali Linux 2023.2 onwards but will probably work with:
+This has been tested on Kali Linux 2023.2 onwards but will probably work with:
 
 * Kali 2022.2+ (untested)
 * Ubuntu 18.04+
