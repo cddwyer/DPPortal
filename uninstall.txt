@@ -1,6 +1,39 @@
 #!/bin/bash
 
+
+####Gather info
+
+workDir=/etc/dpportal
+configDir=/etc/dpportal/config
+dbcfgFile=$configDir/db.cfg
+
+
 ####Stuff to be used in formatting
+
+#Set sciptempls for colouring echo lines
+warn="\e[1;31m"      # warning (red)
+info="\e[1;34m"      # info (blue)
+q="\e[1;32m"         # questions (green)
+
+
+###Some more colour and formatting vars, some may become redundant as I continue to dev and tidy up my project
+_bold=$(tput bold)
+_underline=$(tput sgr 0 1)
+_reset=$(tput sgr0)
+_purple=$(tput setaf 171)
+_red=$(tput setaf 1)
+_green=$(tput setaf 76)
+_tan=$(tput setaf 3)
+_blue=$(tput setaf 38)
+
+
+#User running script
+
+curUser=$(who | awk '{print $1}' | head -1)
+curUserHomeDir=$(eval echo ~$curUser)
+
+
+#Print logo function
 
 function _printPoweredBy()
 {
@@ -25,6 +58,7 @@ function _printPoweredBy()
 EOF
 }
 
+
 #Bells and whistles
 function _arrow()
 {
@@ -47,86 +81,167 @@ function _die()
 }
 
 
+### User query ###
+
+function checkLootNeed()
+{
+
+	sureAns=5
+
+	while [ $sureAns -ne 1 ]; do 
+
+		clear
+	    _printPoweredBy
+
+		# Check if user wants to dump loot for keepz
+		_arrow
+		echo -e "$qDo you want to save the contents of the loot database to a text file before uninstalling DPPortal? (y/n)"
+		read -s -n 1 saveLootAnswer
+
+		if [[ "$saveLootAnswer" == "y" ]]; then
+			echo -e "$infoSaving the contents of your loot database to $curUserHomeDir/DPPortal_Lootz.txt"
+			sleep 1
+	        saveDemLootz
+            surAns=1
+            return 0
+		elif [[ "$saveLootAnswer" == "n" ]]; then
+	    	sureAns=1
+            return 0
+		else
+			surAns=4
+		fi
+	done
+	return 0
+    
+}
+
+
 ### DPPortal uninstall script ###
 
+function uninstallContent()
+{
 
-#Disable site in apache2
+	#Disable site in apache2
+	clear
+	_printPoweredBy
+	_arrow "Disabling sites..."
+	sleep 0.5
 
+	_arrow "Disabling portal..."
+	a2dissite dpportal.conf
+	sleep 1.5
+	if [[ $? -eq 0 ]]; then
+		clear
+	    _printPoweredBy
+		_success "Portal Disabled."
+	else
+		_error "Something went wrong there, check Apache sites yourself!"
+	fi
 
-clear
-_printPoweredBy
-_arrow "Disabling sites..."
-sleep 0.5
+	_arrow "Disabling admin panel site..."
+	a2dissite dppdisplay.conf
+	if [[ $? -eq 0 ]]; then
+		clear
+	    _printPoweredBy
+		_success "Admin Panel Site Disabled."
+	else
+		_error "Something went wrong there, check Apache sites yourself!"
+	fi
+	
+	sleep 2
+	
+	echo -e "\n\n\n"
+	_arrow "Reloading Apache2"
+	
+	#Reload Apache
+	systemctl reload apache2
+	
+	sleep 1
+	
+	_arrow "Removing site config files"
+	#Remove site config files
+	rm -f /etc/apache2/sites-available/dpportal.conf
+	rm -f /etc/apache2/sites-available/dppoptions.conf
+	rm -f /etc/apache2/sites-available/dppdisplay.conf
+	
+	sleep 0.5
+	
+	_arrow "Removing site content..."
+	
+	#Remove site content
+	rm -rf /var/www/dpportal
+	rm -rf /var/www/dppoptions
+	rm -rf /var/www/dppdisplay
 
-_arrow "Disabling portal..."
-a2dissite dpportal.conf
-sleep 1.5
-if [[ $? -eq 0 ]]; then
+	sleep 0.5
+
+	_arrow "Removing log files..."
+
+	#Remove log files
+	rm -rf /var/log/apache2/dpporta*
+
+	_arrow "Removing runtime files..."
+
+	#Remove etc content
+	rm -rf /etc/dpportal/config
+	rm -rf $0
+	rmdir `dirname $0`
+	rmdir /etc/dpportal
+
 	clear
     _printPoweredBy
-	_success "Portal Disabled."
-else
-	_error "Something went wrong there, check Apache sites yourself!"
-fi
+	_success "Successfully uninstalled DPPortal. Thanks for giving it a go, hope to see you again soon!"
 
-_arrow "Disabling login options site..."
-a2dissite dppoptions.conf
-if [[ $? -eq 0 ]]; then
+	exit 0
+}
+
+function saveDemLootz()
+{
+
+	#GetDB creds in vars
+	lootHost=$(cat $dbcfgfile | grep '^host=' | sed 's/host=//g')
+	lootDB=$(cat $dbcfgfile | grep '^database=' | sed 's/database=//g')
+	lootUser=$(cat $dbcfgfile | grep '^dbuser=' | sed 's/dbuser=//g')
+	lootPass=$(cat $dbcfgfile | grep '^dbpass=' | sed 's/dbpass=//g')
+    
+    mysqldump -u $lootUser -p $lootPass $lootDB > $curUserHomeDir/DPPortal_Lootz.txt
+    
+    sleep 3
+    
+    uninstallContent()
+
+}
+
+function startUninstall()
+{
+
 	clear
-    _printPoweredBy
-	_success "Options site Disabled."
-else
-	_error "Something went wrong there, check Apache sites yourself!"
-fi
-_arrow "Disabling admin panel site..."
-a2dissite dppdisplay.conf
-if [[ $? -eq 0 ]]; then
-	clear
-    _printPoweredBy
-	_success "Admin Panel Site Disabled."
-else
-	_error "Something went wrong there, check Apache sites yourself!"
-fi
+	_printPoweredBy
 
-sleep 2
+	echo -e "$infoWelcome to the uninstaller for DPPortal. We're sorry you've chosen to take such extreme measures."
+	_arrow
+	echo -e "$q\n\nAre you sure you wish to continue with the uninstallation? (y/n)\n\n"
 
-echo -e "\n\n\n"
-_arrow "Reloading Apache2"
+	read -n 1 uninAns
 
-#Reload Apache
-systemctl reload apache2
+	if [[ "$uninAns" == "y" ]]; then
+    	checkLootNeed()
+	elif [[ "$uninAns" == "n" ]]; then
+    	echo -e "$infoThank fuck for that, got a bit worried for a second there...!"
+        exit 0
+    else
+    	_arrow
+        echo -e "$infoWell I don't know how you managed to fuck that up, it was a simple question after all. Anyway Ima take that as a lack of conviction in your answer and the uninstaller will now exit!"
+        sleep 5
+        clear
+        _printPoweredBy
+        echo -e "$infoIt's been emotional, thanks for changing your mind and not uninstalling me after all!"
+        _arrow "Bye!"
+		exit 0
+	fi
+        
+}
 
-sleep 1
+#Single line to start uninstall
 
-_arrow "Removing site config files"
-#Remove site config files
-rm -f /etc/apache2/sites-available/dpportal.conf
-rm -f /etc/apache2/sites-available/dppoptions.conf
-rm -f /etc/apache2/sites-available/dppdisplay.conf
-
-sleep 0.5
-
-_arrow "Removing site content..."
-
-#Remove site content
-rm -rf /var/www/dpportal
-rm -rf /var/www/dppoptions
-rm -rf /var/www/dppdisplay
-
-sleep 0.5
-
-_arrow "Removing log files..."
-#Remove log files
-rm -rf /var/log/apache2/dpporta*
-
-_arrow "Removing runtime files..."
-#Remove etc content
-rm -rf /etc/dpportal/config
-rm -rf $0
-rmdir `dirname $0`
-rmdir /etc/dpportal
-
-clear
-_success "Successfully uninstalled DPPortal. Thanks for giving it a go, hope to see you again soon!"
-
-exit 0
+startUninstall()

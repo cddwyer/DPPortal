@@ -4,6 +4,10 @@
 
 #Written by Double_D  - Sometime in March 2024
 
+### Check for auto run flag arguement
+arArg=$1
+
+
 ###Lets gather some vars
 
 #Custom hosts file
@@ -12,7 +16,7 @@ dppHosts="/etc/dpportal/config/dpphosts"
 #Quick start config file path
 quickStartFile="/etc/dpportal/config/quickstart.cfg"
 
-#Set quick start vars as blank
+#Init blank vars
 useSSID=""
 useInt=""
 useChan=""
@@ -89,11 +93,11 @@ function ctrl_c()
 		fi
 
         if [[ $i -eq 3 ]]; then
-        	a2dissite dppoptions.conf
+        	a2dissite dppdisplay.conf
 		fi
 
         if [[ $i -eq 4 ]]; then
-        	a2dissite dppdisplay.conf
+        	systemctl reload apache2
 		fi
         
         if [[ $i -eq 5 ]]; then
@@ -103,10 +107,11 @@ function ctrl_c()
             echo -n "."
             sleep 1
             echo -n "."
+            sleep 0.5
 		fi
 		echo -n "."
 	done
-    systemctl reload apache2
+    systemctl stop apache2
 	clear
 	echo "$info\n\nIt's been emotional, see you later."
     exit 0
@@ -124,8 +129,10 @@ function configExists()
 		echo "Cannot read values from config file or file does not exist" >> $dppErrLog
 		_error "Quick start file doesn't exist or is not readable."
         quickExists=0
+        _die "You done fucked up and I'm out..!"
 	fi
 }
+
 
 function loadQuickStart()
 {
@@ -187,9 +194,6 @@ function loadQuickStart()
     
 
 }
-
-
-
 
 
 function _printPoweredBy()
@@ -328,6 +332,14 @@ function postFlight()
 	clear
     _printPoweredBy
     
+    echo -e "$info\nIf you would like to monitor the portal's activity then you can tail the following files:"
+    _arrow "For standard output tail: "
+    echo -e "$dppOutLog\n\n"
+    _arrow "For standard error tail: "
+    echo -e "$dppErrLog\n\n"
+
+}
+    
     #If user wants it, show connected clients as and when they connect
     if [[ "$openClients" -eq 1 ]]; then
     	#Not sure if this is one one-off list output or a live tail - may need to modify to update list every couple of seconds or something
@@ -376,16 +388,31 @@ function startBerate()
 	#Starts berate_ap process with user defined arguements and options outputing stdout and stderr to separate custom files
 	berate_ap $allOptsArgs > $dppOutLog 2> $dppErrLog &
 
-	#Put berate_ap's process ID into a var
+	#Put berate_ap's PID into a var
 	thisBeratePID=$(echo $!)
-	
     
     postFlight
 
 }
 
+
+function autoKick() {
+
+	_preFlight
+    configExists
+    loadQuickStart
+    startBerate
+
+}
+
+
 function welcomeAll()
 {
+
+	#Before and frilly output check whether to auto-run, if arguement has been passed it will kick off the autoKick function which requires to user input
+	if [[ "$arArg" == "ar" ]]; then
+    	autoKick
+	fi
 
 	clear
 	_printPoweredBy
@@ -393,7 +420,7 @@ function welcomeAll()
     configExists
     if [[ "$quickExists" -eq 1 ]]; then
     	loadQuickStart
-    	echo -e "$infoIt looks like there is a config file in place with the values you used last time. Woud you like to start DPPortal with these settings (y/n) ...if not you will be asked to configure these options:\n\n"
+    	echo -e "$infoIt looks like there is a config file in place with the values you used last time. Woud you like to start DPPortal with these settings...if not you will be asked to configure these options:\n\n"
         echo "SSID: $useSSID"
 		echo "Interface: $useInt"
 		echo "Channel: $useChan"

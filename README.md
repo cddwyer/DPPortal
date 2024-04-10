@@ -1,6 +1,6 @@
 # ***STILL UNDER DEVELOPMENT***
 
-## Double_D's Dark Phishing Portal
+# Double_D's Dark Phishing Portal
 
 ```
 ________ ____________________              __         .__   
@@ -23,9 +23,8 @@ the credentials entered.
 > [!WARNING]
 > This project is still under development. You will notice that files that should be bash scripts are currently plain text files. I will change them to .sh files once developed to an acceptable/functional v1.0 and will remove this warning message.
 
-## Description
 
-### Portal and Login Options
+## Portal and Login Options
 
 This program uses 'berate_ap' and a connected wireless network interface to
 bring up a an innocent looking public SSID, once connected the user will be
@@ -44,7 +43,8 @@ These are all cloned pages with the login mechanism modified to steal the
 credentials entered all login details will be added to a MySQL database on
 your machine.
 
-### Display Panel
+
+## Display Panel
 
 There is a 'Display Panel' page. The display panel you can access will show
 pull all of the database entries created from our phishing portals and load
@@ -52,7 +52,8 @@ them into a HTML table showing you the attempted login, with columns for the
 username, password, date/time stamp of the entry and the page/service used in
 the attempt.
 
-### Branding Configuration
+
+## Branding Configuration
 
 You can also set the branding, either by creating your own using a wizard I
 built into the tool, or by chosing one already built in from a menu.
@@ -63,16 +64,18 @@ This will then create a new branding set you will be able to chose from the
 menu in the previous step.
 
 
-## Getting Started
+## Installing and running DPPortal
 
-### Installing and running DPPortal
+### Operating System Requirements
+* This has been tested on Kali Linux 2023.2 onwards but will probably work with:
 
-#### Operating System Requirements
-* This has been tested on Kali Linux 2023.2 onwards but will probably work 
-on Ubuntu as well providing all dependant packags are installed. Run with 
-GNU Bash v5.x+, PHP v7.x+
+* Kali 2022.2+ (untested)
+* Ubuntu 18.04+
+* Raspberry Pi OS  (Recommended Pi OS v9 (Stretch) onwards on a Pi3+ or better)
+* Debian based Linux with GNU Bash v5.x+ & PHP v7.x+
 
-#### Package Dependencies
+
+### Package Dependencies
 
 * berate_ap 
 * eterm
@@ -90,7 +93,7 @@ GNU Bash v5.x+, PHP v7.x+
 * dnsmasq
 * iptables
 
-* Appropriate drivers for your NIC
+* Appropriate 802.11 drivers for your NIC
 
 
 ### Installation
@@ -116,20 +119,28 @@ or
 sudo bash install.sh
 ```
 
+
 ### Running DPPortal
 
-* Run dp-portal from terminal with your main intended function as an arguement.
+* Run dp-portal from terminal with your main intended function as an arguement. There are three different options.
 
-* To set the portal branding run:
-
-```
-dpportal setbrand
-```
 
 * To fire up the portal run:
 
 ```
 dpportal run
+```
+
+* To fire up the portal with the current configuration with no further user input needed (such as to setup a Pi appliance) run:
+
+```
+dpportal autorun
+```
+
+* To set the portal branding run:
+
+```
+dpportal setbrand
 ```
 
 * To uninstall DPPortal run:
@@ -138,16 +149,21 @@ dpportal run
 dpportal uninstall
 ```
 
+
 ### Show Usage/Help
 
 To display help and usage:
+
 ```
 dpportal -h
 ```
+
 or
+
 ```
 dpportal --help
 ```
+
 
 ## Legal fluff
 
@@ -158,6 +174,7 @@ dpportal --help
 ## Author
 
 Double_D
+
 
 ## Version History
 
@@ -170,16 +187,18 @@ Double_D
 * 0.1
     * Initial Commit and Push
 
+
 ## License
 
 This project is licensed under the MIT License. You're free to copy, edit or clone 
 any part of my code for your own educational benefit, just please dont plagurise 
 the project and claim credit for yourself, that's not cool.
 
+
 ### Acknowledgments
 
 Inspiration, code snippets, etc.
-* [awesome-readme](https://github.com/matiassingers/awesome-readme)
-* [LitePhish](https://github.com/DarkSecsDevelopers/LitePhish) - Bot detection PHP script and various fake login page clones
+* [awesome-readme](https://github.com/matiassingers/awesome-readme) - Markdown layout cheat sheet (First time I've written a markdown file myself).
+* [LitePhish](https://github.com/DarkSecsDevelopers/LitePhish) - Bot detection PHP script and various fake login page clones.
 * [Pedz] - For introducing me to bash/the UNIX command line in general.
-* [Colin] - For additional help and support developing my commandline skills.
+* [Colin] - For additional help and support developing my Linux commandline skills.

@@ -58,7 +58,7 @@ fi
 #Function that prints arrow then arguement (just bells and whistles)
 function _arrow()
 {
-    printf "➜ $@\n"
+    printf "➜ $@"
 }
 
 function _success()
@@ -110,12 +110,10 @@ function listCurrent()
 	_arrow
 	echo -e "$infoList of installed branding.\n\n"
 	cat -n $brandsFile | awk '{$(NF--)=""; print}'
-    currentBrand=$(cat /etc/dpportal/config/current.conf)
-	currentBrandF=$(cat $brandsFile | grep $currentBrand | awk '{$(NF--)=""; print}')
-    echo -e "$infoThe currently active brand is: \n\n$currentBrandF."
-    _arrow "Press any key when you are ready to return to the main menu."
-    read -s -n 1 "Waiting for key press..."
-    mainMenu
+	echo -e "$infoThe currently active brand is: \n\n$currentBrandF."
+	_arrow "Press any key when you are ready to return to the main menu."
+	read -s -n 1 "Waiting for key press..."
+	mainMenu
 
 }
 

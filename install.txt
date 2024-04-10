@@ -7,6 +7,7 @@ warn="\e[1;31m"      # warning (red)
 info="\e[1;34m"      # info (blue)
 q="\e[1;32m"         # questions (green)
 
+
 ###Some more colour and formatting vars, some may become redundant as I continue to dev and tidy up my project
 _bold=$(tput bold)
 _underline=$(tput sgr 0 1)
@@ -17,12 +18,14 @@ _green=$(tput setaf 76)
 _tan=$(tput setaf 3)
 _blue=$(tput setaf 38)
 
+
 #Check if running as root first
 scriptUser=$(id -u)
 if [[ $scriptUser -ne 0 ]]; then
 	echo -e "$warn\nThis script needs to be run with sudo privileges. Exiting, no changes have been made...\n"
 	exit 1
 fi
+
 
 #DB char set
 export LC_CTYPE=C
@@ -123,6 +126,55 @@ echo -e "$infoThis will install DPPortal, all it's content and dependant package
 read -s -n 1 "Waiting for key press..."
 
 }
+
+
+function initAuthCreds() {
+
+	passMatch=0
+
+	#Setup credentials for display panel site authentication
+	valUser="pwner"
+    
+    digestPath=/etc/dpportal/config/.htdigest
+    touch $digestPath
+    
+    valRealm="dppdisplay"
+
+	#Loop input requests until passwords match
+	do
+    	clear
+        _printPoweredBy
+		_arrow "In order to access the loot display panel you will need to login with a password, please create one here (minimum length 5 characters, no trailing or leading spaces and no special characters):"
+		
+        #Password prompt 1
+        read -r -s -p "Password: " dispPass
+		echo -e "\n\n"
+		sleep 0.5
+		
+        #Password prompt 2
+        read -r -s -p "Confirm password: " dispPassConf
+
+		#Check that passwords match
+		if [[ "$dispPass" != "$dispPassConf" ]]; then
+			echo -e "$warn\nThose passwords didn't match you wally!"
+ 		elif [[ "$dispPass" == "$dispPassConf" ]]; then
+        	valPass="$dispPass"
+            passMatch=1
+		else
+        	_arrow "Strange things be going on here."
+		fi
+	
+    #Loop condition is while password match flag is negative
+	while [[ $passMatch -ne 1 ]] done
+
+
+	digestPass="$( printf "%s:%s:%s" "$valUser" "$valRealm" "$valPass" | md5sum | awk '{print $1}' )"
+
+	printf "%s:%s:%s\n" "$valUser" "$valRealm" "$digestPass" > $digestPath
+
+
+}
+
 
 
 #Function to create database if it doesnt exist already and grabs root password if needed
@@ -310,6 +362,7 @@ function installContent()
 clear
 _printPoweredBy
 checkPreReqs
+initAuthCreds
 createDBStuff
 setHostsFile
 installContent

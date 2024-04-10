@@ -44,20 +44,29 @@ function _die()
     exit 1
 }
 
+
 function printUsage()
 {
 	clear
 	_printPoweredBy
-	echo -e "$info\nCall DPPortal with the function you wish to run, example: \n\n\ndpportal run\n\n or \n\ndpportal setbrand\n\ndpportal uninstall\n\n"
+    _arrow "Help/Usage:"
+	echo -e "$info\nCall DPPortal with the function you wish to run, example: \n\n\ndpportal run (To fire up the portal as configured).\n\ndpportal stop (To stop the portal).\n\n or \n\ndpportal setbrand (To configure the portal's branding).\n\n or \n\ndpportal uninstall (To start the portal uninstaller).\n\n"
 	_safeExit
 }
 
 function processArgs()
 {
 
+	if [[ $# -gt 1 ]]; then
+    	clear
+        _printPoweredBy
+    	_error "Only one arguement is required."
+        _die "I'm off bruv!"
+	fi
+
+
 	argCommand=$1
 	
-    if [[
     # Get function called and refer shell to relavent script
     for arg in "$@"
     do
@@ -69,7 +78,14 @@ function processArgs()
             run)
 				cd $runtimeDir
 				./bootstrap.sh
+			;;
+            autorun)
+            	cd $runtimeDir
+                ./bootstrap.sh 'ar'
             ;;
+            stop)
+            	stopBerate
+			;;
 			uninstall)
 				read -p "Are you sure you want to uninstall this fine tool?! (yes/no)" uninVar
                 if [[ "$uninVar" = "yes" ]]; then
@@ -97,6 +113,20 @@ function processArgs()
             ;;
         esac
     done
+
+}
+
+function stopBerate()
+{
+
+	clear
+	_printPoweredBy
+	beratePID=$(pgrep berate_ap | head -1)
+	kill -9 $beratePID
+    a2dissite dpportal.conf
+    a2dissite dppdisplay.conf
+    systemctl stop apache2
+    echo -e "$info\nYou have chosen to quit DPPortal and the associated processes have been stopped.
 
 }
 
@@ -140,22 +170,28 @@ sleep 1
 }
 
 function checkRoot() {
+
 	#Check if running as root first
 	scriptUser=$(id -u)
+    
 	if [[ $scriptUser -ne 0 ]]; then
+    	clear
+        _printPoweredBy
 		echo -e "$warn\nThis script needs to be run with sudo privileges. Exiting, no changes have been made...\n"
 		_die "Insufficiently privileged! Bye."
 	fi
+
 }
 
 
 function openingMsg() {
 
-clear
-_printPoweredBy
-checkRoot
-processArgs
+	clear
+	_printPoweredBy
+	checkRoot
+	processArgs
 
 }
 
+#Single line to kick off script
 openingMsg
