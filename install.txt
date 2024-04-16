@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#####Log start time of install script in seconds
+
+scriptStart=$(date +%s)
+
+
 #####Setting varz and spitting barz#####
 
 #Set sciptempls for colouring echo lines
@@ -19,40 +24,57 @@ _tan=$(tput setaf 3)
 _blue=$(tput setaf 38)
 
 
-#Check if running as root first
-scriptUser=$(id -u)
-if [[ $scriptUser -ne 0 ]]; then
-	echo -e "$warn\nThis script needs to be run with sudo privileges. Exiting, no changes have been made...\n"
-	exit 1
-fi
+function initBlurb () {
+
+	getUserConsent
+
+	echo -e "$info\nGathering some info...\n"
+    
+    sleep 2
+    
+    echo -e "$info\nBuilding working directories...\n\n"
+
+	#Create base directories
+	mkdir -p /etc/dpportal
+	mkdir -p /etc/dpportal/run
+	mkdir -p /etc/dpportal/config
+    mkdir -p /etc/dpportal/logs
+    
+    #Log for installation
+    touch /etc/dpportal/logs/install.log
+    
+    #Var it
+	installLog=/etc/dpportal/logs/install.log
+
+	#Check if running as root first
+	scriptUser=$(id -u)
+	
+    if [[ $scriptUser -ne 0 ]]; then
+		echo -e "$warn\nThis script needs to be run with sudo privileges. Exiting, no changes have been made...\n"
+		_die "You done fucked up, me be dipping!"
+	fi
+
+	echo -e "$info\nSetting charset for database creation...\n"
+	#DB char set
+	export LC_CTYPE=C
+	export LANG=C
 
 
-#DB char set
-export LC_CTYPE=C
-export LANG=C
+	echo -e "$info\nSetting variables...\n"
+	#Define install dir
+	installDir=$(echo $PWD)
 
-echo -e "$info\nGathering some info...\n"
+	#Current user
+	curUser=$(who | awk '{print $1}' | head -1)
 
-#Define install dir
-installDir=$(echo $PWD)
+	#Config dir set
+	configDir=/etc/dpportal/config
 
-#Create base directories
-mkdir -p /etc/dpportal
-mkdir -p /etc/dpportal/run
-mkdir -p /etc/dpportal/config
+	#Touch database config file
+	touch $configDir/db.cfg
+	dbcfgFile=$configDir/db.cfg
 
-#Current user
-curUser=$(who | awk '{print $1}' | head -1)
-
-#Check mysql binary exec location
-BIN_MYSQL=$(which mysql)
-
-#DB config file set
-configDir=/etc/dpportal/config
-
-#Touch database config file
-touch $configDir/db.cfg
-dbcfgFile=$configDir/db.cfg
+}
 
 
 #Generate random DB password
@@ -122,8 +144,15 @@ function _safeExit()
 function getUserConsent()
 {
 
-echo -e "$infoThis will install DPPortal, all it's content and dependant packages, do you wish to continue? If not press control C, other with press any key to continue."
-read -s -n 1 "Waiting for key press..."
+	echo -e "$infoThis will install DPPortal, all it's content and dependant packages, do you wish to continue? (y/n)"
+	read -s -n 1 installConsent
+	if [[ "$installConsent" == "n" ]]; then
+		nowTime=$(date +%s)
+        elapSec=$((nowTime  - scriptStart))
+        secSince=$(echo $elapSec | sed 's/-//g')
+		echo -e "$warnYou have chosen not to install this tool $elapSec seconds after running the installation script."
+        echo -e "$info\nNgl you seem pretty indecisive.\n"
+        _die "I be dipping!"
 
 }
 
@@ -154,16 +183,21 @@ function initAuthCreds() {
         #Password prompt 2
         read -r -s -p "Confirm password: " dispPassConf
 
-		#Check that passwords match
-		if [[ "$dispPass" != "$dispPassConf" ]]; then
-			echo -e "$warn\nThose passwords didn't match you wally!"
- 		elif [[ "$dispPass" == "$dispPassConf" ]]; then
-        	valPass="$dispPass"
-            passMatch=1
+		#Check that passwords match and are nott empty
+		pLength=${#dispPass}
+        if [[ $pLenth -ge 5 ]]; then
+        	if [[ "$dispPass" != "$dispPassConf" ]]; then
+				echo -e "$warn\nThose passwords didn't match you wally!"
+ 			elif [[ "$dispPass" == "$dispPassConf" ]]; then
+        		valPass="$dispPass"
+            	passMatch=1
+			else
+        		_arrow "Strange things be going on here."
+			fi
 		else
-        	_arrow "Strange things be going on here."
+        	echo -e "$warn\nYou password must be longer than that! Be sensible.\n"
 		fi
-	
+
     #Loop condition is while password match flag is negative
 	while [[ $passMatch -ne 1 ]] done
 
@@ -219,7 +253,7 @@ function createDBStuff()
         _arrow "Please enter root MySQL/MariaDB user password!"
         read rootPassword
         echo -e "$info\nCreating MySQL user and database...\n"
-        $BIN_MYSQL -h $DB_HOST -u root -p${rootPassword} -e "${SQL1}${SQL2}${SQL3}${SQL4}"
+        $BIN_MYSQL -h $DB_HOST -u root -p${rootPassword} -e "${SQL1}${SQL2}${SQL3}${SQL4}" >>$installLog 2>&1
         sleep 2
         if [[ $? - eq 0 ]]; then
         	clear
@@ -248,6 +282,7 @@ function createDBStuff()
     fi
 }
 
+
 function setHostsFile()
 {
 	
@@ -257,62 +292,89 @@ function setHostsFile()
     sleep 0.5
     
     #Add our sites to hosts file
-	sed -i '/^127.0.0.1*/a 127.0.0.1\	captive.dpportal.co.uk\n127.0.1.2\	display.dpportal.co.uk' /etc/dpportal/config/dpphosts
+	sed -i '/^127.0.0.1*/a 127.0.0.1\	captive.dpportal.io\n127.0.1.2\	display.dpportal.io' /etc/dpportal/config/dpphosts
 	sleep 1
 }
 
 function checkPreReqs()
 {
 
+	#Check Apache installed
+    apacheP=$(dpkg --get-selections | grep -c 'apache2-bin')
+    
+    if [[ $apacheP -eq 0 ]]; then
+		apt update && apt install -y apache2 >>$installLog 2>&1
+	fi
+
+    #Check for MySQL/MariaDB Server
+	isDBServer=$(dpkg -l | grep -e mysql-server -e mariadb-server -c)
+    if [[ $isDBServer -ge 1 ]]; then
+		#Check mysql binary exec location
+		BIN_MYSQL=$(which mysql)
+	else 
+		echo -e "$info\nInstalling MariaDB Server...\n"
+        apt update && apt install -y mariadb-server >>$installLog 2>&1
+        sleep 3
+		if [[ $? -ne 0 ]]; then
+            echo -e "$info\nCouldn't quite manage installation of MariaDB Server, now trying MySQL Server instead...\n"
+            apt install mysql-server >>$installLog 2>&1
+            if [[ $? -eq 0 ]]; then
+                echo -e "$info\nSuccessfully installaed MySQL Server."
+			else
+               	echo -e "$warn\nLooks like we couldn't install the database software, this is such a fundamental part of DPPortal that the installer must now exit until you can resolve the issue.\n"
+			fi
+		else
+            echo -e "$info\nSuccessfully installed MariaDB Server...\n"
+            sleep 1
+            echo -e "$infoContinuing with the portal installation..."
+		fi
+	fi
+
+
 	#Check if Apache has PHP enabled
 	apachePM=$(dpkg --get-selections | grep -c 'libapache2-mod-php')
+    phpPkgs=$(dpkg --get-selections | grep -c 'php')
+    	
 
-	if [[ $apachePM -le 0 ]]; then
-		echo -e "$warn\nIt looks like either PHP isn't installed or isn't enabled in Apache2, \nplease ensure its installed and enabled and run this installer again."
-		exit 1
-    else
-    
-    
+	if [ "$apachePM" -eq 0 ] && [ "$phpPkgs" -le 1 ]; then
+		apt update && apt install -y php libapache2-mod-php php-mysql >>$installLog 2>&1
 	fi
 
 	apacheRun=$(systemctl status apache2 | grep Active\:\ active)
 
 	if [[ ! -z $apacheRun ]]; then
 		echo -e "$info\nApache2 is not running. \nAttempting to start..."
-		systemctl start apache2
+		systemctl start apache2 >>$installLog 2>&1
 		sleep 4
 		apacheRunNow$(systemctl status apache2 | grep Active\:\ active)
 		sleep 1
 		if [[ ! -z $apacheRunNow ]]; then
 			echo "There were problems starting Apache, you should look into that!"
         else
-        	clear
+        	echo -e "$info\nEnabling digest authentication...\n"
+        	cd /etc/apache2/mods-available/
+            a2enmod auth_digest >>$installLog 2>&1
+            systemctl restart apache2
+            sleep 2
 		fi
 	fi
 
 	isBerate=$(dpkg --get-selections | grep -c 'berate-ap')
 	if [[ $isBerate -eq 0 ]]; then
-		echo -e "$q\nDependent package Berate_AP doesn't look like its installed, \nShall we try and install it now? [yes/no]"
-		read berateAnswer
-		if [[ "$berateAnswer" == "yes" ]]; then
-        	clear
-			apt update && apt install -y berate-ap
-            	if [[ $? -ne 0 ]]; then
-                	echo -e "$warn\nLooks like the command to install Berate_AP didn't exit with code 0\n" 
-                    echo -e "$q\nShall we continue anyway? [yes/no]\n"
-                    read contAnyAns
-                    if [[ "$contAnyAns" != "yes" ]]; then
-                    	clear
-                        echo -e "$warn\nLooks like we're done here then, exiting...\n"
-                        exit 1
-                    fi
-				fi
-		else
-			echo -e "$warn\nWithout Berate_AP this noble phishing tool will nae work. \nExiting installer..."
+		apt update && apt install -y berate-ap >>$installLog 2>&1
+        if [[ $? -ne 0 ]]; then
+        	echo -e "$warn\nLooks like the command to install Berate_AP didn't exit with code 0\n" 
+            echo -e "$q\nShall we continue anyway? [yes/no]\n"
+            read contAnyAns
+            if [[ "$contAnyAns" != "yes" ]]; then
+            	clear
+				echo -e "$warn\nLooks like we're done here then, exiting...\n"
+                echo "Berate AP install failed!" >> $installLog
+                _die "Bye!"
+            fi
 		fi
 	fi
-    
-    
+
 }
 
 
@@ -322,7 +384,6 @@ function installContent()
     #Log directories and files
     
     mkdir -p /var/log/apache2/dpportal
-    mkdir -p /etc/dpportal/logs
     
     # !! Action moved to bootstrap functions '_pruneLogs()' and/or 'preFlight()'
     #touch /etc/dpportal/logs/dpp-error.log
@@ -361,6 +422,7 @@ function installContent()
 
 clear
 _printPoweredBy
+initBlurb
 checkPreReqs
 initAuthCreds
 createDBStuff

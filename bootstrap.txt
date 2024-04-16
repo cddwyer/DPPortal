@@ -440,9 +440,13 @@ function welcomeAll()
         	startBerate
         elif [[ "$quickAnswer" == "n" ]]; then
         	goingQuick=0
+            _pruneLogs
+            _preFlight
             askQuestions
 		fi
 	else
+    	_pruneLogs
+        _preFlight
     	askQuestions
 	fi
 
