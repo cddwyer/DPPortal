@@ -126,10 +126,14 @@ function configExists()
         quickExists=1
 		loadQuickStart
 	else
-		echo "Cannot read values from config file or file does not exist" >> $dppErrLog
-		_error "Quick start file doesn't exist or is not readable."
-        quickExists=0
-        _die "You done fucked up and I'm out..!"
+		if [[ ! -f "$quickStartFile" ]]; then
+        	quickExists=0
+		else
+        	echo "Cannot read values from config file or file does not exist" >> $dppErrLog
+			_error "Quick start file doesn't exist or is not readable."
+        	quickExists=0
+        	_die "You done fucked up and I'm out..!"
+		fi
 	fi
 }
 
@@ -337,8 +341,6 @@ function postFlight()
     echo -e "$dppOutLog\n\n"
     _arrow "For standard error tail: "
     echo -e "$dppErrLog\n\n"
-
-}
     
     #If user wants it, show connected clients as and when they connect
     if [[ "$openClients" -eq 1 ]]; then
@@ -390,6 +392,8 @@ function startBerate()
 
 	#Put berate_ap's PID into a var
 	thisBeratePID=$(echo $!)
+    
+    echo -e "$info\nDPPortal has started with the process ID as $thisBeratePID."
     
     postFlight
 

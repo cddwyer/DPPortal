@@ -50,7 +50,7 @@ function printUsage()
 	clear
 	_printPoweredBy
     _arrow "Help/Usage:"
-	echo -e "$info\nCall DPPortal with the function you wish to run, example: \n\n\ndpportal run (To fire up the portal as configured).\n\ndpportal stop (To stop the portal).\n\n or \n\ndpportal setbrand (To configure the portal's branding).\n\n or \n\ndpportal uninstall (To start the portal uninstaller).\n\n"
+	echo -e "$info\nCall DPPortal with the function you wish to run, example: \n\n\ndpportal run (To fire up the portal as configured).\n\ndpportal autorun (To start the portal immediately with the previously configured settings).\n\ndpportal stop (To stop the portal).\n\ndpportal setbrand (To configure the portal's branding).\n\n or \n\ndpportal uninstall (To start the portal uninstaller).\n\n"
 	_safeExit
 }
 
@@ -138,6 +138,8 @@ function _safeExit()
 function ctrl_c()
 {
 	echo -e "$info\nExiting DP_Portal."
+    beratePIC=$(pgrep berate_ap | head -1)
+    kill -9 $beratePID
 	systemctl stop apache2 2>&1 /dev/null
 	sleep 1.5
    _safeExit

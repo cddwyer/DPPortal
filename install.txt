@@ -296,6 +296,15 @@ function setHostsFile()
 	sleep 1
 }
 
+
+function setDatabasePHPConfig()
+{
+
+cd /var/www/dpportal/login/modules
+sed -i "s/GREGWALLACE/$DB_PASS/g" dbcfg.php
+
+}
+
 function checkPreReqs()
 {
 
@@ -391,7 +400,7 @@ function installContent()
 	
 	#Install fake portal site content
     
-	rsync -rlptgoD  $installDir/data/sites/* /var/www/
+	rsync -rlptgoD  $installDir/data/* /var/www/
 
 	#Disable any current sites in Apache2
     
@@ -420,6 +429,7 @@ function installContent()
 
 }
 
+#Run all install functions in order
 clear
 _printPoweredBy
 initBlurb
@@ -428,3 +438,4 @@ initAuthCreds
 createDBStuff
 setHostsFile
 installContent
+setDatabasePHPConfig
