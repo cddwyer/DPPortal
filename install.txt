@@ -380,7 +380,7 @@ function checkPreReqs()
 				echo -e "$warn\nLooks like we're done here then, exiting...\n"
                 echo "Berate AP install failed!" >> $installLog
                 _die "Bye!"
-            fi
+			fi
 		fi
 	fi
 
