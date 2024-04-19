@@ -304,6 +304,9 @@ function setDatabasePHPConfig()
 cd /var/www/dpportal/login/modules
 sed -i "s/GREGWALLACE/$DB_PASS/g" dbcfg.php
 
+cp --preserve dbcfg.php /var/www/dppdisplay/
+
+
 }
 
 function checkPreReqs()
