@@ -211,17 +211,18 @@ function initAuthCreds() {
 
 
 
-#Function to create database if it doesnt exist already and grabs root password if needed
+#Function to create database and table if it doesnt exist already and grabs root password if needed
 function createDBStuff()
 {
-    SQL1="CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
+    SQL1="CREATE DATABASE ${DB_NAME};"
     SQL2="CREATE USER '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASS}';"
     SQL3="GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';"
     SQL4="FLUSH PRIVILEGES;"
+    SQL5="CREATE TABLE loot(username VARCHAR(128) NOT NULL,password VARCHAR(60) NOT NULL,service VARCHAR(20) NOT NULL,datetimestamp VARCHAR(40) NOT NULL,id INT AUTOINCREMENT,PRIMARY KEY(id));"
 
     if [ -f /root/.my.cnf ]; then
     	echo -e "$info\nCreating MySQL user and database...\n"
-        $BIN_MYSQL -e "${SQL1}${SQL2}${SQL3}${SQL4}"
+        $BIN_MYSQL -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}"
         if [[ $? -eq 0 ]]; then
         	clear
             _printPoweredBy
@@ -253,7 +254,7 @@ function createDBStuff()
         _arrow "Please enter root MySQL/MariaDB user password!"
         read rootPassword
         echo -e "$info\nCreating MySQL user and database...\n"
-        $BIN_MYSQL -h $DB_HOST -u root -p${rootPassword} -e "${SQL1}${SQL2}${SQL3}${SQL4}" >>$installLog 2>&1
+        $BIN_MYSQL -h $DB_HOST -u root -p${rootPassword} -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}" >>$installLog 2>&1
         sleep 2
         if [[ $? - eq 0 ]]; then
         	clear
