@@ -37,7 +37,7 @@ are:
 * Instagram
 * Microsoft Office 365
 * Yahoo
-* Twitter
+* X (Formerly Twitter)
 
 These are all cloned pages with the login mechanism modified to steal the 
 credentials entered all login details will be added to a MySQL database on
