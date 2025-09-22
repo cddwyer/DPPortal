@@ -30,7 +30,7 @@ if ($stmt->execute()) {
     $conn->close();
     
     // Redirect to BBC
-    header("Location: https://bbc.co.uk");
+    header("Location: loadingpage.html");
     exit();
 } else {
     echo "Error: " . $stmt->error;
