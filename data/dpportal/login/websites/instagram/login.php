@@ -2,7 +2,7 @@
 // Database connection parameters
 $servername = "127.0.0.1";
 $username = "dpuser";
-$password = "Eggy123";
+$password = "DPDBPASSWORD";
 $dbname = "DPPortal";
 
 // Create connection

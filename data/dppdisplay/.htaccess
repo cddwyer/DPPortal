@@ -1,0 +1,17 @@
+DirectoryIndex index.php index.html
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+</IfModule>
+
+Options -Indexes
+Options +FollowSymlinks
+
+
+<Files .htaccess>
+	deny from all
+</Files>
+
+AuthType Basic
+AuthName "Loot Vault: PROVE YOURSELF!"
+AuthUserFile /var/www/dppdisplay/.htpasswd
+require valid-user

@@ -24,7 +24,7 @@ _tan=$(tput setaf 3)
 _blue=$(tput setaf 38)
 
 
-function initBlurb () {
+function initBlurb() {
 
 	getUserConsent
 
@@ -84,11 +84,23 @@ function generatePassword()
     echo "$(openssl rand -base64 12)"
 }
 
-#DB vars set calling random password generator function to set db password
-DB_HOST='localhost'
-DB_NAME='dpportal'
-DB_USER='dpportaluser'
-DB_PASS=$(generatePassword)
+
+function setDBDetails() {
+
+	#DB vars set calling random password generator function to set db password
+	DB_HOST='127.0.0.1'
+	DB_NAME='DPPortal'
+	DB_USER='dpuser'
+	DB_PASS=$(generatePassword)
+
+	echo "DBHOST=$DB_HOST" > $dbcfgFile
+	echo "DBNAME=$DB_NAME" >> $dbcfgFile
+	echo "DBUSER=$DB_USER" >> $dbcfgFile
+	echo "DBPASS=$DB_PASS" >> $dbcfgFile
+	
+
+}
+
 
 function _printPoweredBy()
 {
@@ -105,6 +117,8 @@ function _printPoweredBy()
                                                                
 
   written by: Double_D
+  
+  INSTALLING "$@"
 
 
 
@@ -164,11 +178,9 @@ function initAuthCreds() {
 	#Setup credentials for display panel site authentication
 	valUser="pwner"
     
-    digestPath=/etc/dpportal/config/.htdigest
-    touch $digestPath
+    adminAuthFilePath=/etc/dpportal/config/.htpasswd
+    touch $adminAuthFilePath
     
-    valRealm="dppdisplay"
-
 	#Loop input requests until passwords match
 	do
     	clear
@@ -201,11 +213,8 @@ function initAuthCreds() {
     #Loop condition is while password match flag is negative
 	while [[ $passMatch -ne 1 ]] done
 
-
-	digestPass="$( printf "%s:%s:%s" "$valUser" "$valRealm" "$valPass" | md5sum | awk '{print $1}' )"
-
-	printf "%s:%s:%s\n" "$valUser" "$valRealm" "$digestPass" > $digestPath
-
+	echo $valPass | htpasswd -c -i /var/www/dppdisplay/.htpasswd $valUser
+	
 
 }
 
@@ -302,7 +311,7 @@ function setDatabasePHPConfig()
 {
 
 cd /var/www/dpportal/login/modules
-sed -i "s/GREGWALLACE/$DB_PASS/g" dbcfg.php
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" dbcfg.conf
 
 cp --preserve dbcfg.php /var/www/dppdisplay/
 
@@ -317,6 +326,11 @@ function checkPreReqs()
     
     if [[ $apacheP -eq 0 ]]; then
 		apt update && apt install -y apache2 >>$installLog 2>&1
+		enableBasicAuth
+		
+	else
+		echo "Apache2 installed, enabling basic auth..." >>$installLog 2>&1
+		enableBasicAuth
 	fi
 
     #Check for MySQL/MariaDB Server
@@ -366,7 +380,7 @@ function checkPreReqs()
         else
         	echo -e "$info\nEnabling digest authentication...\n"
         	cd /etc/apache2/mods-available/
-            a2enmod auth_digest >>$installLog 2>&1
+            a2enmod auth_basic >>$installLog 2>&1
             systemctl restart apache2
             sleep 2
 		fi
@@ -391,13 +405,47 @@ function checkPreReqs()
 }
 
 
+function enableBasicAuth() {
+
+apacheCFG="/etc/apache2/apache2.conf"
+
+cp "$apacheCFG" "${apacheCFG}.bak"
+
+
+awk '
+/<Directory \/var\/www\/>/ {in_block=1}
+in_block && /AllowOverride None/ {
+	sub(/AllowOverride None/, "AllowOverride AuthConfig")
+}
+in_block && /<\/Directory>/ {in_block=0}
+{print}
+' "$apacheCFG" > "${CONF_FILE}.tmp"
+
+mv "${CONF_FILE}.tmp" "$apacheCFG"
+
+#	IFS=$'\n'
+#	for $fileLine in $(cat "$apacheCFG")
+#	do
+#	if [[ $fileLine = *"<Directory /var/www/>"* ]]; then
+#		cTagOpen=1
+#	fi
+#	if [[ $fileLine = *"</Directory>"* ]]; then
+#		cTagOpen=0
+#	fi
+#	if [[ cTagOpen -eq 1 ]] && [[ $fileLine == "AllowOverride None" ]]
+
+
+}
+
+
 function installContent()
 {
 
     #Log directories and files
     
     mkdir -p /var/log/apache2/dpportal
-    
+	mkdir -p /var/log/apache2/dppdisplay
+
     # !! Action moved to bootstrap functions '_pruneLogs()' and/or 'preFlight()'
     #touch /etc/dpportal/logs/dpp-error.log
     #touch /etc/dpportal/logs/dpp-output.log
@@ -407,7 +455,6 @@ function installContent()
 	rsync -rlptgoD  $installDir/data/* /var/www/
 
 	#Disable any current sites in Apache2
-    
     echo -e "$info\nDisabling existing sites running in Apache2\n"
     rm -rf /etc/apache2/sites-enabled/*
     systemctl reload apache2
@@ -415,14 +462,21 @@ function installContent()
 
 	#Install site configs
     
-	rsync -rlptgoD $installDir/config/sites/dpportal.conf /etc/apache2/sites-available/
-	rsync -rlptgoD $installDir/config/sites/dppoptions.conf /etc/apache2/sites-available/
-    rsync -rlptgoD $installDir/config/sites/dppdisplay.conf /etc/apache2/sites-available/
+	rsync -r -l -p -t -g -o -D $installDir/config/sites/dpportal.conf /etc/apache2/sites-available/
+#	rsync -r -l -p -t -g -o -D $installDir/config/sites/dppoptions.conf /etc/apache2/sites-available/
+    rsync -r -l -p -t -g -o -D $installDir/config/sites/dppdisplay.conf /etc/apache2/sites-available/
+	
+	#Set site data ownership and permissions
+	chown -R www-data:www-data /var/www/dppdisplay
+	chmod -R a+x /var/www/dppdisplay
+	chown -R www-data:www-data /var/www/dpportal
+	chmod -R a+x /var/www/dpportal
+
 	
     # Enable sites and reload Apache service
     
     a2ensite dpportal.conf
-	a2ensite dppoptions.conf
+#	a2ensite dppoptions.conf
     a2ensite dppdisplay.conf
     systemctl reload apache2
     
@@ -433,13 +487,52 @@ function installContent()
 
 }
 
+
+function insertSQLPass() {
+
+#Inserts SQL DB password to all the login.php files
+#Set portal dir
+phishyDir="/var/www/dpportal/login/websites/"
+
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/google/login.php"
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/m365/login.php"
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/x/login.php"
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/yahoo/login.php"
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/instagram/login.php"
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/facebook/login.php"
+
+
+
+}
+
 #Run all install functions in order
 clear
-_printPoweredBy
+_printPoweredBy "DP Portal"
 initBlurb
+sleep 1
+_printPoweredBy "Database details"
+sleep 1
+setDBDetails
+_printPoweredBy "Checking for pre-req packages...."
+sleep 1
 checkPreReqs
+_printPoweredBy "Setting admin panel credentials..."
+sleep 1
 initAuthCreds
+_printPoweredBy "Creating the database itself"
+sleep 1
 createDBStuff
+_printPoweredBy "Modding the hosts file..."
+sleep 1
 setHostsFile
+_printPoweredBy "Installing site content..."
+sleep 1
 installContent
+_printPoweredBy "Configuring PHP"
+sleep 1
 setDatabasePHPConfig
+_printPoweredBy "Tweaking your SQL nips..."
+sleep 1
+insertSQLPass
+sleep 1
+

@@ -1,8 +1,8 @@
  <?php
-$servername = "localhost";
-$username = "dpportaluser";
-$password = "GREGWALLACE";
-$dbname = "dpportal";
+$servername = "127.0.0.1";
+$username = "DPDBUSER";
+$password = "DPDBPASSWORD";
+$dbname = "DPPortal";
 
 // Create connection
 $conn = mysqli_connect($servername, $username, $password, $dbname);

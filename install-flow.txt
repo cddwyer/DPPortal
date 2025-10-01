@@ -1,0 +1,11 @@
+INSTALLER FLOW FOR DPPORTAL
+
+
+initBlurb > getUSerConsent
+setDBDetails > GeneratePassword
+checkPrereqs (installs packages), enables apache2 basic auth
+initAuthCreds - sets up basic auth creds and htpasswd file
+createDBStuff > writes to /etc/dpportal/config/db.cfg
+setHostsFile
+setphpconfig write deets to dbcfg.conf in modules
+insertSQLPassword
