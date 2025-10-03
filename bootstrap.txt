@@ -299,7 +299,7 @@ function askQuestions()
 	read useType
     
 	if [[ "$useType" != "AC" && "$useType" != "N" ]]; then
-		_error "That wasn't a valid Wi-Fi standard, the options are AC or N"
+		_error "That wasn't a valid Wi-Fi standard, the options are AC BG or N"
     	_die "Closing down..."
 	fi
 
@@ -315,17 +315,28 @@ function askQuestions()
 	if [[ "$useType" == "BG" ]]; then
 		$allOptsArgs+=" --ieee80211bg"
 	fi
+	
+	writeTempConfig
+	
+	echo "Would you like to save these values to the auto run file? Y/N (optional)"
+	read optSavetoAuto
+	optSaveAns="${optSavetoAuto^^}"
+	
+	if [[ $optSaveAns == "Y" ]]; then
+	
     
-    #Write vars to config file
-    configFile=/etc/dpportal/config/quickstart.cfg
-    echo "SSID=$useSSID" > $configFile
-    echo "INTERFACE=$useInt" >> $configFile
-    echo "CHANNEL=$useChan" >> $configFile
-    echo "FREQUENCY=$useFreq" >> $configFile
-    echo "BSSID=$useBSSID" >> $configFile
-    echo "DRIVER=$useDriver" >> $configFile
-    echo "SHOWCLIENTS=$useShowClients" >> $configFile
-    echo "USETYPE=$useType" >> $configFile
+    	#Write vars to config file
+    	configFile=/etc/dpportal/config/quickstart.cfg
+    	echo "SSID=$useSSID" > $configFile
+    	echo "INTERFACE=$useInt" >> $configFile
+    	echo "CHANNEL=$useChan" >> $configFile
+    	echo "FREQUENCY=$useFreq" >> $configFile
+    	echo "BSSID=$useBSSID" >> $configFile
+    	echo "DRIVER=$useDriver" >> $configFile
+    	echo "SHOWCLIENTS=$useShowClients" >> $configFile
+    	echo "USETYPE=$useType" >> $configFile
+
+fi
 
     #Set final required args
     allOptsArgs+=" $useInt $useSSID"
