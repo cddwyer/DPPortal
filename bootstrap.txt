@@ -123,8 +123,14 @@ function configExists()
 	dppOutLog="/etc/dpportal/logs/$dppOutLogName"
 	dppErrLog="/etc/dpportal/logs/$dppErrLogName"
 	if [[ -r "$quickStartFile" ]]; then
-        quickExists=1
-		loadQuickStart
+		cfgSSIDValue=$(cat $quickStartFile | grep "^SSID=" | sed 's/SSID=//g')
+		if [[ -z $cfgSSIDValue ]]; then
+        	quickExists=0
+			echo "Doesn't appear to have values set in the quick start config file" >> $dppErrLog
+			_error "Sorry I can't read values from that file, specifically the SSID seems to be blank..."
+			_die "Quitting now, I'm done with you fr!!"
+		fi
+
 	else
 		if [[ ! -f "$quickStartFile" ]]; then
         	quickExists=0
@@ -251,7 +257,7 @@ function askQuestions()
     echo "What channel would you like to run the AP on? (optional)"
 	read useChan
 
- 	if [[ ! -z "$useChan" && "$useChan" != " " ]]; then
+ 	if [[ ! -z "$useChan" ]] && [[ "$useChan" != " " ]] && [[ $useChan =~ ^[0-9]+$ ]]; then
 		allOptsArgs+=" -c $useChan"
 	fi
 
@@ -260,13 +266,19 @@ function askQuestions()
     
 	if [[ ! -z "$useFreq" && "$useFreq" != " " ]]; then
 		allOptsArgs+=" --freq-band $useFreq"
+	else
+		useFreq="2.4"
+		allOptsArgs+=" --freq-band $useFreq"
 	fi
     
-    echo "Would you like to specify a BSSID for the AP? (optional)"
+    echo "Would you like to specify a BSSID for the AP? (optional, but if you do specify one, please use a colon as the delimiter)"
 	read useBSSID
     
 	if [[ ! -z "$useBSSID" && "$useBSSID" != " " ]]; then
 		allOptsArgs+=" --mac $useBSSID"
+	else
+		useBSSID="6C:AA:B3:AE:FE:78"
+		allOpsArgs+=" --mac $useBSSID"
 	fi
     
 	echo "Would you like to specify a driver to use for the network interface? (default: nl80211)"
@@ -293,13 +305,16 @@ function askQuestions()
 
 	#Set one wi-fi standard only
 	if [[ "$useType" == "AC" ]]; then
-		allOptsArgs+=" --ieee80211ac"
+		$allOptsArgs+=" --ieee80211ac"
 	fi
 
 	if [[ "$useType" == "N" ]]; then
-		allOptsArgs+=" --ieee80211n"
-        fi
+		$allOptsArgs+=" --ieee80211n"
     fi
+	
+	if [[ "$useType" == "BG" ]]; then
+		$allOptsArgs+=" --ieee80211bg"
+	fi
     
     #Write vars to config file
     configFile=/etc/dpportal/config/quickstart.cfg
@@ -360,6 +375,26 @@ function _pruneLogs()
 	#Delete logs older than 7 days
 	echo "Pruning logs..." >> $dppOutLog
 	find /etc/dpportal/logs/ -mtime +7 -type f -exec rm {} \; > $dppOutLog 2> $dppErrLog
+
+}
+
+
+function writeTempConfig() {
+
+	rm -f "/etc/ddportal/config/.configUsado.cfg"
+	touch "/etc/dpportal/config/.configUsado.cfg"
+	tmpCfgFile="/etc/dpportal/config/.configUsado.cfg"
+
+	#Write current set of configuration values to a temp config that can be re-used or recovered later
+	echo "SSID=$useSSID" >>  $tmpCfgFile
+	echo "INTERFACE=$useInt" >>  $tmpCfgFile
+	echo "CHANNEL=$useChan" >> $tmpCfgFile
+	echo "FREQUENCY=$useFreq" >> $tmpCfgFile
+	echo "BSSID=$useBSSID" >> $tmpCfgFile
+	echo "DRIVER=$useDriver" >> $tmpCfgFile
+	echo "SHOWCLIENTS=$useShowClients" >> $tmpCfgFile
+	echo "USETYPE=$useType" >> $tmpCfgFile
+
 
 }
 

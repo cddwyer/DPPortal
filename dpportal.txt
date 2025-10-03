@@ -126,6 +126,7 @@ function stopBerate()
     a2dissite dpportal.conf
     a2dissite dppdisplay.conf
     systemctl stop apache2
+	systemctl stop mysql
     echo -e "$info\nYou have chosen to quit DPPortal and the associated processes have been stopped.
 
 }
@@ -138,10 +139,11 @@ function _safeExit()
 function ctrl_c()
 {
 	echo -e "$info\nExiting DP_Portal."
-    beratePIC=$(pgrep berate_ap | head -1)
-    kill -9 $beratePID
-	systemctl stop apache2 2>&1 /dev/null
-	sleep 1.5
+#    beratePIC=$(pgrep berate_ap | head -1)
+#    kill -9 $beratePID
+#	systemctl stop apache2 2>&1 /dev/null
+#	sleep 1.5
+	stopBerate
    _safeExit
 }
 
