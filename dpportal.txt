@@ -170,6 +170,7 @@ function _printPoweredBy()
 
 ################################################################
 EOF
+echo -e "$infoThe best DP you'll ever have..."
 sleep 1
 }
 

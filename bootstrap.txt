@@ -4,9 +4,6 @@
 
 #Written by Double_D  - Sometime in March 2024
 
-### Check for auto run flag arguement
-arArg=$1
-
 
 ###Lets gather some vars
 
@@ -129,6 +126,9 @@ function configExists()
 			echo "Doesn't appear to have values set in the quick start config file" >> $dppErrLog
 			_error "Sorry I can't read values from that file, specifically the SSID seems to be blank..."
 			_die "Quitting now, I'm done with you fr!!"
+		else
+			quickExists=1
+			echo -e "$infoA quick start file has been found.\n\nReading values..."
 		fi
 
 	else
@@ -336,7 +336,7 @@ function askQuestions()
     	echo "SHOWCLIENTS=$useShowClients" >> $configFile
     	echo "USETYPE=$useType" >> $configFile
 
-fi
+	fi
 
     #Set final required args
     allOptsArgs+=" $useInt $useSSID"
@@ -361,6 +361,10 @@ function postFlight()
 
 	clear
     _printPoweredBy
+	
+	sleep 1
+	
+	beratePID=$(pgrep berate_ap | head -1)
     
     echo -e "$info\nIf you would like to monitor the portal's activity then you can tail the following files:"
     _arrow "For standard output tail: "
@@ -413,7 +417,6 @@ function writeTempConfig() {
 function _preFlight()
 {
 
-	_pruneLogs
 
 	#set log files
 	dStamp=$(date '+%Y%m%d%H%M%S')
@@ -435,9 +438,13 @@ function startBerate()
 
 	#Starts berate_ap process with user defined arguements and options outputing stdout and stderr to separate custom files
 	berate_ap $allOptsArgs > $dppOutLog 2> $dppErrLog &
+	
+	#Give it a coupl of seconds to initalise
+	sleep 2
 
 	#Put berate_ap's PID into a var
 	thisBeratePID=$(echo $!)
+	beratePID=$(pgrep berate_ap | head -1)
     
     echo -e "$info\nDPPortal has started with the process ID as $thisBeratePID."
     
@@ -459,9 +466,13 @@ function autoKick() {
 function welcomeAll()
 {
 
-	#Before and frilly output check whether to auto-run, if arguement has been passed it will kick off the autoKick function which requires to user input
-	if [[ "$arArg" == "ar" ]]; then
-    	autoKick
+	#Before any frilly output, check whether to auto-run, if arguement has been passed it will kick off the autoKick function which requires no user input
+	quantArgs = $#
+	if [[ "$quantArgs" -eq 1 ]]; then
+		singleArg = $1
+		if [[ "$singleArg" == "ar" ]]; then
+			autoKick
+		fi
 	fi
 
 	clear
@@ -487,6 +498,7 @@ function welcomeAll()
         read quickAnswer
         if [[ "$quickAnswer" == "y" ]]; then
         	goingQuick=1
+			loadQuickStart
         	startBerate
         elif [[ "$quickAnswer" == "n" ]]; then
         	goingQuick=0
