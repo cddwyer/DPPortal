@@ -238,7 +238,7 @@ function createNewBrand()
 
 
 	#Get user friendly name of company branding to use
-	echo -e "$qWhat's the user friendly name (in proper case, with spaces etc) of the company branding you're going to use? (e.g. Starbucks Coffee)\n\n"
+	echo -e "$qWhat's the user friendly name (in proper case, with spaces etc) of the company branding you're going to use? (e.g. "Starbucks Pro-Genocide Coffee Company.")\n\n"
 	read newFriendlyName
 
 	if [[ -z "$newFriendlyName" ]]; then
@@ -247,10 +247,30 @@ function createNewBrand()
 		sleep 3
 		mainMenu
 	fi
+	
+	#Check if friendly name already in use
+	friendlyUsed=$(cat /etc/dpportal/config/brands.lst | grep -c "$newFriendlyName")
+	if [[ $friendlyUsed -ne 0 ]]; then
+		_error "Looks like that name already exists in your brands list..."
+		_error "Sending you back to the main menu..."
+		sleep 3.5
+		clear
+		mainMenu
+	fi
 
 	#Get shortname to use in folder naming
-	echo -e "$qWhat's a shortname for the branding? This cannot contain special characters or spaces! (e.g. for Transport For London use TFL or londontransport etc.)\n\n"
+	echo -e "$qWhat's a shortname for the branding? This cannot contain special characters or spaces! (e.g. for Transport For London use TFL or ldntransport etc.)\n\n"
 	read newShortName
+	
+	#Check if short name already in use
+	shortUsed=$(cat /etc/dpportal/config/brands.lst | grep -c "$newShortName")
+	if [[ $shortUsed -ne 0 ]]; then
+		_error "Looks like that name already exists in your brands list..."
+		_error "Sending you back to the main menu..."
+		sleep 3.5
+		clear
+		mainMenu
+	fi
 
 	if [[ -z "$newShortName" ]]; then
 		echo -e "$warnThis can't be blank! Bye now. Troll!"
@@ -262,12 +282,19 @@ function createNewBrand()
     
     if [[ $newShortName == *['!'@#\$%^\&*()_+]* ]]; then
 		echo -e "$warnYour friendly name has special characters in it! What did I tell you about special charaters in short names?! Plank!"
-        _die "Daft bastard...!"
+        _error "Daft bastard...!"
+		_error "You done fucked up!"
+	    sleep 2
+	    clear
+	    mainMenu
 	fi
     
     if has-space $newShortName ; then
     	echo -e "$warnWhat did I tell you about spaces in the short name?! Daft bastard!"
-        _die "You done fucked this right up!"
+        _error "You done fucked this right up!"
+		sleep 2
+		clear
+		mainMenu
 	fi
 
 	_arrow
@@ -285,10 +312,11 @@ function createNewBrand()
 	#Check file type
 	bgiFileType=$(identify $chosenBrandBGI | awk '{print $2}')
 
-	if [[ "$bgiFileType" != "JPEG" && "$bgiFileType" != "PNG" ]]; then
+	if [[ "$bgiFileType" != "JPEG" ]] && [[ "$bgiFileType" != "PNG" ]]; then
 		echo -e "$warn\nFam it needs to be an image that exists, of the jpg or png variety.\n"
 	    echo -e "$info\nSending you back to the main menu in 5 seconds...\n"
 	    sleep 5
+		clear
 	    mainMenu
 	fi
 
@@ -302,15 +330,17 @@ function createNewBrand()
 
 	if [[ -z "$chosenBrandLogo" ]]; then
 		echo -e "$warnThis can't be blank! Bye now. Troll!"
-	    _die "You done fucked up!"
+	    _error "You done fucked up!"
+		clear
+		mainMenu
 	fi
     
     newBLType=$(identify $chosenBrandLogo | awk '{print $2}')
 
 	if [[ "$newBLType" != "JPEG" && "newBLType" != "PNG" ]]; then
 		echo -e "$warn\nFam it needs to be an image that exists, of the jpg or png variety.\n"
-		echo -e "$info\nSending you back to the main menu in 5 seconds...\n"
-		sleep 5
+		echo -e "$info\nSending you back to the main menu in 3 seconds...\n"
+		sleep 3.5
 		mainMenu
 	fi
 
@@ -329,6 +359,14 @@ function createNewBrand()
 	elif [[ "$newBLType" == "PNG" ]]; then
     	cp $chosenBrandLogo /var/www/dpportal/brands/$newShortName/logo-main.png
 	fi
+	
+	
+	#Write new portal index file
+	cp /etc/dpportal/config/indextemplate.html /var/www/dpportal/brands/$newShortName/
+	wholeBGName=$(ls /var/www/dpportal/brands/$newShortName/ | grep "bg-main")
+	wholeLogoName=$(ls /var/www/dpportal/brands/$newShortName/ | grep "logo-main")
+	sed -i 's/REPLACETHISWITHBGIMAGE/$wholeBGName/g' /var/www/dpportal/brands/$newShortName
+	sed -i 's/REPLACETHISWITHBGIMAGE/$wholeLogoName/g' /var/www/dpportal/brands/$newShortName
 
 
 	#Add brand to list file
