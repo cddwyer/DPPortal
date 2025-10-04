@@ -362,11 +362,11 @@ function createNewBrand()
 	
 	
 	#Write new portal index file
-	cp /etc/dpportal/config/indextemplate.html /var/www/dpportal/brands/$newShortName/
+	cp /etc/dpportal/config/indextemplate.html /var/www/dpportal/brands/$newShortName/index.html
 	wholeBGName=$(ls /var/www/dpportal/brands/$newShortName/ | grep "bg-main")
 	wholeLogoName=$(ls /var/www/dpportal/brands/$newShortName/ | grep "logo-main")
 	sed -i 's/REPLACETHISWITHBGIMAGE/$wholeBGName/g' /var/www/dpportal/brands/$newShortName
-	sed -i 's/REPLACETHISWITHBGIMAGE/$wholeLogoName/g' /var/www/dpportal/brands/$newShortName
+	sed -i 's/REPLACETHISWITHLOGOIMAGE/$wholeLogoName/g' /var/www/dpportal/brands/$newShortName
 
 
 	#Add brand to list file
