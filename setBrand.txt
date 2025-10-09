@@ -138,8 +138,8 @@ function mainMenu()
 	
 	echo -e "$infoWhat would you like to do today?\n\n\n"
 
-	echo -e "\n1. List currently installed branding options.\n"
-	echo -e "\n2. Set an installed branding set as the current one to use.\n"
+	echo -e "\n1. List currently available branding options.\n"
+	echo -e "\n2. Enable an installed branding set as the current one to use.\n"
 	echo -e "\n3. Install a new brand.\n"
 	echo -e "\n\nq. Quit.\n"
 	
@@ -169,7 +169,7 @@ function setBrand()
 {
 
 	#Shows list of currently installed brandings with corresponding line numbers
-	showCurrent
+	listCurrent
 	_arrow
 	echo -e "$qWhich branding set would you list to use (enter number from list)...\n\n"
 	
@@ -192,7 +192,7 @@ function setBrand()
     cd /var/www/dpportal
     
     #Sets full name in index file template
-    sed -i "s/COMPANYNAME/$chosenBrandF/g" index.htmll
+    sed -i "s/COMPANYNAME/$chosenBrandF/g" index.html
     
     #Puts short name into current brand config file
 	echo $chosenBrand > /etc/dpportal/config/current.conf
@@ -207,7 +207,15 @@ function setBrand()
     #Notifies user and exits
     echo -e "$infoThe branding has been successfully set to $chosenBrandF.\n\nThank you, you can now run DPPortal with your new branding setup."
     sleep 1.5
-    _safeExit
+	_arrow "Would you like to now launch DPPortal with the new brand set? (y/[n])"
+	read runNowChoice
+    
+	if [[ "$runNowChoice" != "y" ]]; then
+		echo -e "$infoYou said no, of gave an invalid choice, exiting now..."
+    	_safeExit "Goodbye"
+	else
+		./bootstrap.sh
+	fi
 
 }
 
@@ -373,7 +381,7 @@ function createNewBrand()
 	echo "$newFriendlyName $newShortName" >> /etc/dpportal/config/brands.lst
     
     #Inform user branding installed but not set and sends them back to the main menu
-    echo -e "$info\nYour new branding has been installed, you must select it as the active one by returning to the main menu and selecting option 2. \n\nPress any key to return to the main menu..."
+    echo -e "$info\nYour new branding has been installed, you must enable it as the active one by returning to the main menu and selecting option 2. \n\nPress any key to return to the main menu..."
     read -s -n 1 "Waiting for key press..."
     mainMenu
     

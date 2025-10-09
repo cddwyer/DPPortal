@@ -127,7 +127,7 @@ function stopBerate()
     a2dissite dppdisplay.conf
     systemctl stop apache2
 	systemctl stop mysql
-    echo -e "$info\nYou have chosen to quit DPPortal and the associated processes have been stopped.
+    echo -e "$info\nYou have chosen to quit DPPortal and the associated processes have been stopped."
 
 }
 
