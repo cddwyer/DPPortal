@@ -1,0 +1,3 @@
+TO LIST
+
+-You added custom domain config in install script, now make sure that the vhost files reflect custom domain if necessary [DONE]

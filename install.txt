@@ -81,6 +81,9 @@ function initBlurb() {
 		captiveDomain="captive.dpportal.io"
 	else
 		captiveDomain=$captiveDomainAns
+		echo "User specified custom captive portal domain of $captiveDomainAns" >> $installLog
+		touch /etc/dpportal/config/customdomain.conf
+		echo "captive $captiveDomainAns" >> /etc/dpportal/config/customdomain.conf
 	fi
 	
 	echo -e "$qWould you like to use a custom domain for the loot/admin panel site? If so enter here, if blank default of loot.dpportal.io will be used."
@@ -89,6 +92,8 @@ function initBlurb() {
 		lootDomain="loot.dpportal.io"
 	else
 		lootDomain=$lootDomainAns
+		echo "User specified custom loot portal domain of $lootDomainAns" >> $installLog
+		touch /etc/dpportal/config/customdomain.conf
 	fi
 	
 	
@@ -316,7 +321,24 @@ function createDBStuff()
 
 function setHostsFile()
 {
+
+	#Check for custom domains and apply if necessary
+	if [[ -f /etc/dpportal/config/customdomain.conf ]]; then
 	
+		doesCap=$(cat /etc/dpportal/config/customdoamin.conf | grep -c "^captive")
+		if [[ $doesCap -eq 1 ]]; then
+			customCapDom=$(cat /etc/dpportal/config/customdomain.conf | grep "^captive" | cut -d " " -f 2)
+			captiveDomain=$customCapDom
+		fi
+		
+		doesLoot=$(cat /etc/dpportal/config/customdomain.conf | grep -c "^loot")
+		if [[ $doesLoot -eq 1 ]]; then
+			customLootDom=$(cat /etc/dpportal/config/customdomain.conf | grep "^loot" > cut -d " " -f 2)
+			lootDomain=$customLootDomain
+		fi
+		
+	fi
+
     #Copy Hosts file and preserve current POSIX permissions
     cp --preserve /etc/hosts /etc/dpportal/config/dpphosts
     
