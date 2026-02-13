@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 #####Log start time of install script in seconds
 
@@ -208,36 +208,40 @@ function initAuthCreds() {
     touch $adminAuthFilePath
     
 	#Loop input requests until passwords match
-	do
-    	clear
-        _printPoweredBy
+	#passMatch=0
+	#while [[ $passMatch -ne 1 ]]
+	#do
+	while true; do
+    		#clear
+        	#_printPoweredBy
 		_arrow "In order to access the loot display panel you will need to login with a password, please create one here (minimum length 5 characters, no trailing or leading spaces and no special characters):"
 		
-        #Password prompt 1
-        read -r -s -p "Password: " dispPass
+        	#Password prompt 1
+        	read -r -s -p "Password: " dispPass
 		echo -e "\n\n"
 		sleep 0.5
 		
-        #Password prompt 2
-        read -r -s -p "Confirm password: " dispPassConf
+        	#Password prompt 2
+        	read -r -s -p "Confirm password: " dispPassConf
 
 		#Check that passwords match and are nott empty
 		pLength=${#dispPass}
-        if [[ $pLenth -ge 5 ]]; then
-        	if [[ "$dispPass" != "$dispPassConf" ]]; then
+        	if [[ $pLength -ge 5 ]]; then
+        		if [[ "$dispPass" != "$dispPassConf" ]]; then
 				echo -e "$warn\nThose passwords didn't match you wally!"
  			elif [[ "$dispPass" == "$dispPassConf" ]]; then
-        		valPass="$dispPass"
-            	passMatch=1
+        			valPass="$dispPass"
+            			passMatch=1
+            			break
 			else
-        		_arrow "Strange things be going on here."
+        			_arrow "Strange things be going on here."
 			fi
 		else
-        	echo -e "$warn\nYou password must be longer than that! Be sensible.\n"
+        		echo -e "$warn\nYou password must be longer than that! Be sensible.\n"
 		fi
 
-    #Loop condition is while password match flag is negative
-	while [[ $passMatch -ne 1 ]] done
+    	#Loop condition is while password match flag is negative
+	done
 
 	echo $valPass | htpasswd -c -i /var/www/dppdisplay/.htpasswd $valUser
 	
@@ -291,7 +295,7 @@ function createDBStuff()
         echo -e "$info\nCreating MySQL user and database...\n"
         $BIN_MYSQL -h $DB_HOST -u root -p${rootPassword} -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}" >>$installLog 2>&1
         sleep 2
-        if [[ $? - eq 0 ]]; then
+        if [[ $? -eq 0 ]]; then
         	clear
             _printPoweredBy
             echo -e "\n\n\n\n\n"
