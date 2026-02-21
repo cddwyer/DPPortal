@@ -293,7 +293,7 @@ function createDBStuff()
         _arrow "Please enter root MySQL/MariaDB user password!"
         read rootPassword
         echo -e "$info\nCreating MySQL user and database...\n"
-        $BIN_MYSQL -h $DB_HOST -u root -p${rootPassword} -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}" >>$installLog 2>&1
+        $BIN_MYSQL -u root -p${rootPassword} -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}" >>$installLog 2>&1
         sleep 2
         if [[ $? -eq 0 ]]; then
         	clear
