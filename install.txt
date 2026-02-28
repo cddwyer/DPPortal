@@ -38,7 +38,8 @@ function initBlurb() {
 	mkdir -p /etc/dpportal
 	mkdir -p /etc/dpportal/run
 	mkdir -p /etc/dpportal/config
-    mkdir -p /etc/dpportal/logs
+    	mkdir -p /etc/dpportal/logs
+    	mkdir -p /etc/dpportal/help
     
     #Log for installation
     touch /etc/dpportal/logs/install.log
@@ -105,14 +106,14 @@ function initBlurb() {
 
 function generatePassword()
 {
-    echo "$(openssl rand -base64 12)"
+    echo "$(openssl rand -base64 32 | tr -dc 'A-Za-z0-9' | head -c 16)"
 }
 
 
 function setDBDetails() {
 
 	#DB vars set calling random password generator function to set db password
-	DB_HOST='127.0.0.1'
+	DB_HOST='localhost'
 	DB_NAME='DPPortal'
 	DB_USER='dpuser'
 	DB_PASS=$(generatePassword)
@@ -253,73 +254,74 @@ function initAuthCreds() {
 #Function to create database and table if it doesnt exist already and grabs root password if needed
 function createDBStuff()
 {
-    SQL1="CREATE DATABASE ${DB_NAME};"
-    SQL2="CREATE USER '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASS}';"
-    SQL3="GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';"
-    SQL4="FLUSH PRIVILEGES;"
-    SQL5="CREATE TABLE loot(id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,username VARCHAR(128) NOT NULL,password VARCHAR(60) NOT NULL,service VARCHAR(20) NOT NULL,datetimestamp VARCHAR(40) NOT NULL);"
+	SQL1="CREATE DATABASE ${DB_NAME};"
+	SQL2="CREATE USER '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASS}';"
+	SQL3="GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';"
+	SQL4="FLUSH PRIVILEGES;"
+	SQL5="USE ${DB_NAME};"
+	SQL6="CREATE TABLE loot(id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,username VARCHAR(128) NOT NULL,password VARCHAR(60) NOT NULL,service VARCHAR(20) NOT NULL,datetimestamp VARCHAR(40) NOT NULL);"
 
-    if [ -f /root/.my.cnf ]; then
-    	echo -e "$info\nCreating MySQL user and database...\n"
-        $BIN_MYSQL -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}"
-        if [[ $? -eq 0 ]]; then
-        	clear
-            _printPoweredBy
-            echo -e "\n\n\n\n\n"
-            echo "host=$DB_HOST" > $dbcfgFile
-            echo "database=$DB_NAME" >> $dbcfgFile
-            echo "dbuser=$DB_USER" >> $dbcfgFile
-            echo "dbpass=$DB_PASS" >> $dbcfgFile
-            clear
-            _printPoweredBy
-            _success "Database $DB_NAME and user $DB_USER has been created with necessary permissions granted..."
-        else
-        	_error "There was a problem creating the database and/or user."
-            echo -e "$warn\nDo you want to exit the installer now or continue on with the install and troubleshoot the DB later?(y/n)\n"
-            read exitReply
-				if [ "$exitReply" = "y" ] | [ "$exitReply" = "Y" ]; then
-                	clear
-                    _printPoweredBy
-					echo "host=$DB_HOST" > $dbcfgFile
-					echo "database=$DB_NAME" >> $dbcfgFile
-					echo "dbuser=$DB_USER" >> $dbcfgFile
-					echo "dbpass=$DB_PASS" >> $dbcfgFile
-                    echo -e "$info\n\nYou have chosen to exit, the database config file has been created with values but you still need to check MySQL/MariaDB, exiting....\n\n"
-                    _safeExit
-                fi
-        fi
-    else
-        # If /root/.my.cnf doesn't exist then it'll ask for root password
-        _arrow "Please enter root MySQL/MariaDB user password!"
-        read rootPassword
-        echo -e "$info\nCreating MySQL user and database...\n"
-        $BIN_MYSQL -u root -p${rootPassword} -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}" >>$installLog 2>&1
-        sleep 2
-        if [[ $? -eq 0 ]]; then
-        	clear
-            _printPoweredBy
-            echo -e "\n\n\n\n\n"
-            echo "host=$DB_HOST" > $dbcfgFile
-            echo "database=$DB_NAME" >> $dbcfgFile
-            echo "dbuser=$DB_USER" >> $dbcfgFile
-            echo "dbpass=$DB_PASS" >> $dbcfgFile
-            _success "Database $DB_NAME and user $DB_USER has been created and necessary permissions have been granted..."
-        else
-        	_error "There was a problem creating the database and/or user."
-            echo -e "$warn\nDo you want to exit the installer now or continue on with the install and troubleshoot the DB later?(y/n)\n"
-            read exitReply
+	if [ -f /root/.my.cnf ]; then
+    		echo -e "$info\nCreating MySQL user and database...\n"
+        	$BIN_MYSQL -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}"
+        	if [[ $? -eq 0 ]]; then
+        		clear
+            		_printPoweredBy
+            		echo -e "\n\n\n\n\n"
+            		echo "host=$DB_HOST" > $dbcfgFile
+            		echo "database=$DB_NAME" >> $dbcfgFile
+            		echo "dbuser=$DB_USER" >> $dbcfgFile
+            		echo "dbpass=$DB_PASS" >> $dbcfgFile
+            		clear
+            		_printPoweredBy
+            		_success "Database $DB_NAME and user $DB_USER has been created with necessary permissions granted..."
+        	else
+        		_error "There was a problem creating the database and/or user."
+            		echo -e "$warn\nDo you want to exit the installer now or continue on with the install and troubleshoot the DB later?(y/n)\n"
+            		read exitReply
+			if [ "$exitReply" = "y" ] | [ "$exitReply" = "Y" ]; then
+                		clear
+                    		_printPoweredBy
+				echo "host=$DB_HOST" > $dbcfgFile
+				echo "database=$DB_NAME" >> $dbcfgFile
+				echo "dbuser=$DB_USER" >> $dbcfgFile
+				echo "dbpass=$DB_PASS" >> $dbcfgFile
+                    		echo -e "$info\n\nYou have chosen to exit, the database config file has been created with values but you still need to check MySQL/MariaDB, exiting....\n\n"
+                    		_safeExit
+                	fi
+        	fi
+	else
+        	# If /root/.my.cnf doesn't exist then it'll ask for root password
+        	_arrow "Please enter root MySQL/MariaDB user password!"
+        	read rootPassword
+        	echo -e "$info\nCreating MySQL user and database...\n"
+        	$BIN_MYSQL -u root -p${rootPassword} -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}" >>$installLog 2>&1
+        	sleep 2
+        	if [[ $? -eq 0 ]]; then
+        		clear
+            		_printPoweredBy
+            		echo -e "\n\n\n\n\n"
+            		echo "host=$DB_HOST" > $dbcfgFile
+            		echo "database=$DB_NAME" >> $dbcfgFile
+            		echo "dbuser=$DB_USER" >> $dbcfgFile
+            		echo "dbpass=$DB_PASS" >> $dbcfgFile
+            		_success "Database $DB_NAME and user $DB_USER has been created and necessary permissions have been granted..."
+        	else
+        		_error "There was a problem creating the database and/or user."
+            		echo -e "$warn\nDo you want to exit the installer now or continue on with the install and troubleshoot the DB later?(y/n)\n"
+            		read exitReply
 			if [ "$exitReply" = "y" ] | [ "$exitReply" = "Y" ]; then
 				echo "host=$DB_HOST" > $dbcfgFile
-            	echo "database=$DB_NAME" >> $dbcfgFile
-            	echo "dbuser=$DB_USER" >> $dbcfgFile
-            	echo "dbpass=$DB_PASS" >> $dbcfgFile
-                clear
-                _printPoweredBy
-                echo -e "$info\n\nYou have chosen to exit, but the database config file has been created with values, you still need to check MySQL/MariaDB, exiting....\n\n"
-                _safeExit
-            fi
-        fi
-    fi
+            			echo "database=$DB_NAME" >> $dbcfgFile
+            			echo "dbuser=$DB_USER" >> $dbcfgFile
+            			echo "dbpass=$DB_PASS" >> $dbcfgFile
+                		clear
+                		_printPoweredBy
+                		echo -e "$info\n\nYou have chosen to exit, but the database config file has been created with values, you still need to check MySQL/MariaDB, exiting....\n\n"
+                		_safeExit
+            		fi
+        	fi
+	fi
 }
 
 
@@ -526,6 +528,19 @@ function installContent()
 #	a2ensite dppoptions.conf
     a2ensite dppdisplay.conf
     systemctl reload apache2
+    
+    # Install running scripts
+    
+    cp $installDir/dpportal.sh /etc/dpportal/run/
+    cp $installDir/HowTo/* /etc/dpportal/help/
+    cp $installDir/bootstrap.sh /etc/dpportal/run/
+    cp $installDir/setBrand.sh /etc/dpportal/run/
+    cp $installDir/README.md /etc/dpportal/help/
+    
+    chmod a+x /etc/dpportal/run/dpportal.sh
+    chmod a+x /etc/dpportal/run/bootstrap.sh
+    chmod a+x /etc/dpportal/run/setBrand.sh
+    chmod a+x /etc/dpportal/help/uninstall.sh
     
     #Make binary sym link
     
