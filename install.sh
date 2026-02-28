@@ -4,7 +4,6 @@
 
 scriptStart=$(date +%s)
 
-
 #####Setting varz and spitting barz#####
 
 #Set sciptempls for colouring echo lines
@@ -343,6 +342,10 @@ function setHostsFile()
 			lootDomain=$customLootDomain
 		fi
 		
+	else
+		captiveDomain="captive.dpportal.io"
+		lootDomain="loot.dpportal.io"
+
 	fi
 
     #Copy Hosts file and preserve current POSIX permissions
@@ -351,7 +354,7 @@ function setHostsFile()
     sleep 0.5
     
     #Add our sites to hosts file
-	sed -i '/^127.0.0.1*/a 127.0.0.1\	$captiveDomain\n127.0.1.2\	$lootDomain' /etc/dpportal/config/dpphosts
+	sed -i "/^127\.0\.0\.1/a 127.0.0.1\t${captiveDomain}\n127.0.1.2\t${lootDomain}" /etc/dpportal/config/dpphosts
 	sleep 1
 }
 
