@@ -105,6 +105,19 @@ if [[ $scriptUser -ne 0 ]]; then
 	exit 1
 fi
 
+#Check if service such as Apache is already running
+
+function check_svc_status() {
+	local svcname=$1
+
+	if systemctl is-active --quiet "$svcname"; then
+		echo "Running"
+	else
+		echo "Stopped"
+	fi
+}
+
+
 
 ################## MENU FUNCTIONS #####################
 
@@ -215,6 +228,8 @@ function setBrand()
 	echo $chosenBrandS > /etc/dpportal/config/current.conf
 	
     #Reloads apache and screen display
+
+
     systemctl reload apache2
 	sleep 2
     clear
