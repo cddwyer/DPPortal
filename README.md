@@ -201,6 +201,5 @@ the project and claim credit for yourself, that's not cool.
 
 Inspiration, code snippets, etc.
 * [awesome-readme](https://github.com/matiassingers/awesome-readme) - Markdown layout cheat sheet (First time I've written a markdown file myself).
-* [LitePhish](https://github.com/DarkSecsDevelopers/LitePhish) - Bot detection PHP script and various fake login page clones.
-* [Pedz] - For introducing me to bash/the UNIX command line in general.
-* [Colin] - For additional help and support developing my Linux commandline skills.
+* [LitePhish](https://github.com/DarkSecsDevelopers/LitePhish) - Bot detection PHP script.
+* [Pedz] - For introducing me to bash/the UNIX command line in my early career and being an all-round legend.
