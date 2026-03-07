@@ -347,7 +347,7 @@ function createNewBrand()
 	fi
 
 	#Make directory for brand
-	mkdir -p /var/www/dpportal/brands/$short_name
+	mkdir -p /var/www/dpportal/brands/$newShortName
 
 	_arrow
 
