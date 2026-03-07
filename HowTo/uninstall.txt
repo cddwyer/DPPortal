@@ -1,14 +1,14 @@
 #!/bin/bash
 
 
-####Gather info
+#### Basic vars ####
 
 workDir=/etc/dpportal
 configDir=/etc/dpportal/config
 dbcfgFile=$configDir/db.cfg
 
 
-####Stuff to be used in formatting
+#### Stuff to be used in formatting
 
 #Set sciptempls for colouring echo lines
 warn="\e[1;31m"      # warning (red)
@@ -28,7 +28,6 @@ _blue=$(tput setaf 38)
 
 
 #User running script
-
 curUser=$(who | awk '{print $1}' | head -1)
 curUserHomeDir=$(eval echo ~$curUser)
 
@@ -81,38 +80,43 @@ function _die()
 }
 
 
-### User query ###
+if [[ $EUID -ne 0 ]]; then
+	echo -e "$warnThis script needs to be run as root or with sudo priveleges, please try again..."
+	exit 1
+fi
+
+
+### Database dump query ###
 
 function checkLootNeed()
 {
 
-	sureAns=5
+	clear
+	_printPoweredBy
 
-	while [ $sureAns -ne 1 ]; do 
+	# Check if user wants to dump loot for keepz
+	_arrow
+	echo -e "$qDo you want to save the contents of the loot database to a text file before uninstalling DPPortal? (y/n)"
+	read -s -n 1 saveLootAnswer
 
-		clear
-	    _printPoweredBy
+	if [[ "$saveLootAnswer" == "y" ]]; then
+		saveDemLootz
+	elif [[ "$saveLootAnswer" == "n" ]]; then
+		read -r -t 10 -n 1 -p "Are you sure you don't want to backup the database? If you don't answer within 10 seconds I will assume you are sure. (Y/N)" sureAns
+		sureAns=${sureAns:-y}
+		sureAns=${sureAns,,}
 
-		# Check if user wants to dump loot for keepz
-		_arrow
-		echo -e "$qDo you want to save the contents of the loot database to a text file before uninstalling DPPortal? (y/n)"
-		read -s -n 1 saveLootAnswer
-
-		if [[ "$saveLootAnswer" == "y" ]]; then
-			echo -e "$infoSaving the contents of your loot database to $curUserHomeDir/DPPortal_Lootz.txt"
-			sleep 1
-	        saveDemLootz
-            surAns=1
-            return 0
-		elif [[ "$saveLootAnswer" == "n" ]]; then
-	    	sureAns=1
-            return 0
+		if [[ "$sureAns" == "y" || "$sureAns" == "yes" ]]; then
+			echo -e "$warnOK then your database will be deleted, uninstall continuing in 3.5 seconds...."
+			sleep 4
+			uninstallContent
 		else
-			surAns=4
+			echo -e "$warnOK then lets save that DB..."
+			sleep 2
+			saveDemLootz
 		fi
-	done
-	return 0
-    
+		return 0
+	fi
 }
 
 
@@ -131,8 +135,6 @@ function uninstallContent()
 	a2dissite dpportal.conf
 	sleep 1.5
 	if [[ $? -eq 0 ]]; then
-		clear
-	    _printPoweredBy
 		_success "Portal Disabled."
 	else
 		_error "Something went wrong there, check Apache sites yourself!"
@@ -141,8 +143,6 @@ function uninstallContent()
 	_arrow "Disabling admin panel site..."
 	a2dissite dppdisplay.conf
 	if [[ $? -eq 0 ]]; then
-		clear
-	    _printPoweredBy
 		_success "Admin Panel Site Disabled."
 	else
 		_error "Something went wrong there, check Apache sites yourself!"
@@ -161,7 +161,6 @@ function uninstallContent()
 	_arrow "Removing site config files"
 	#Remove site config files
 	rm -f /etc/apache2/sites-available/dpportal.conf
-	rm -f /etc/apache2/sites-available/dppoptions.conf
 	rm -f /etc/apache2/sites-available/dppdisplay.conf
 	
 	sleep 0.5
@@ -170,7 +169,6 @@ function uninstallContent()
 	
 	#Remove site content
 	rm -rf /var/www/dpportal
-	rm -rf /var/www/dppoptions
 	rm -rf /var/www/dppdisplay
 
 	sleep 0.5
@@ -179,6 +177,7 @@ function uninstallContent()
 
 	#Remove log files
 	rm -rf /var/log/apache2/dpporta*
+	rm -rf /var/log/apache2/dppdispla*
 
 	_arrow "Removing runtime files..."
 
@@ -189,10 +188,10 @@ function uninstallContent()
 	rmdir /etc/dpportal
 
 	clear
-    _printPoweredBy
+	_printPoweredBy
 	_success "Successfully uninstalled DPPortal. Thanks for giving it a go, hope to see you again soon!"
-
 	exit 0
+
 }
 
 function saveDemLootz()
@@ -212,7 +211,7 @@ function saveDemLootz()
 
 }
 
-function startUninstall()
+function checkConsent()
 {
 
 	clear
@@ -220,28 +219,28 @@ function startUninstall()
 
 	echo -e "$infoWelcome to the uninstaller for DPPortal. We're sorry you've chosen to take such extreme measures."
 	_arrow
-	echo -e "$q\n\nAre you sure you wish to continue with the uninstallation? (y/n)\n\n"
+	read -r -p "Are you sure you wish to continue with the passive-aggressive action of uninstallation? (y/N)" uninAns
 
-	read -n 1 uninAns
-
-	if [[ "$uninAns" == "y" ]]; then
-    	checkLootNeed()
-	elif [[ "$uninAns" == "n" ]]; then
-    	echo -e "$infoThank fuck for that, got a bit worried for a second there...!"
-        exit 0
-    else
-    	_arrow
-        echo -e "$infoWell I don't know how you managed to fuck that up, it was a simple question after all. Anyway Ima take that as a lack of conviction in your answer and the uninstaller will now exit!"
-        sleep 5
-        clear
-        _printPoweredBy
-        echo -e "$infoIt's been emotional, thanks for changing your mind and not uninstalling me after all!"
-        _arrow "Bye!"
-		exit 0
-	fi
-        
+	case "$uninAns" in
+		y|Y|yes|YES|Yes)
+			checkLootNeed
+			;;
+		n|N|no|NO|No|"")
+			clear
+			_printPoweredBy
+			echo -e "$qSensible decision there!  Exiting uninstaller...."
+			sleep 3
+			exit 0
+			;;
+		*)
+			clear
+			_printPoweredBy
+			echo -e "$qI'll take that as a no shall I...?"
+			sleep 3
+			exit 0
+			;;
+	esac
 }
 
 #Single line to start uninstall
-
-startUninstall()
+checkConsent
