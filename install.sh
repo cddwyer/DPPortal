@@ -528,9 +528,14 @@ function installContent()
     # Enable sites and reload Apache service
     
     a2ensite dpportal.conf
-#	a2ensite dppoptions.conf
     a2ensite dppdisplay.conf
     systemctl reload apache2
+
+#branding config files
+	cp $installDir/config/current.conf /etc/dpportal/config/
+	cp $installDir/config/brands.lst /etc/dpportal/config/
+
+
     
     # Install running scripts
     
