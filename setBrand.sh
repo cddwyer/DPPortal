@@ -193,49 +193,109 @@ function setBrand()
 {
 
 	#Shows list of currently installed brandings with corresponding line numbers
-	listAllBrands
+	clear
+	_printPoweredBy
+	local p=1
 	_arrow
-	echo -e "$qWhich branding set would you list to use (enter number from list)...\n\n"
+
+	echo -e "$_bold\n\nAVAILABLE BRANDING SETS\n "
+	echo -e "$_reset "
+	echo -e "$_green \n"
+	while IFS= read -r line; do
+	
+		shortBrandName="${line##* }"
+		
+		fullBrandName="${line% $shortBrandName}"
+		
+		echo "${p}. (${shortBrandName}) ${fullBrandName}"
+		
+		echo -e " \n "
+		
+		((p++))
+		
+	done < "$brandsFile"
+	echo -e "$_reset "
+	echo -e "$_tan\n\nThe currently active brand is: $currentBrandF."
+
+	echo -e "$qWhich branding set would you like to enable (enter number from list and press ENTER)...\n\n"
 	
     #Reads number input from user
     read brandAnswer
-	
-    #Refresh screen display
-    clear
-	_printPoweredBy
-	_arrow
-	echo -e "$infoSetting brand...\n\n"
+    
+    
+    if ! [[ "$brandAnswer" =~ ^[1-9][0-9]*$ && "$brandAnswer" -le "$p" ]]; then
+		echo -e "$warnInvalid choice! Sending you back to the main menu..."
+		echo -e "$_reset "
+		sleep 3
+		clear
+		mainMenu
+    fi
+    
+#   if [[ "$brandAnswer" ! =~ ^[0-9]+$ ]]; then
+#		if (( brandAnswer <= p )); then
+#			echo " "
+#		else
+#			echo -e "$warnInvalid choice! Sending you back to the main menu..."
+#			echo -e "$_reset "
+#			sleep 3
+#			clear
+#			mainMenu
+#		fi
+#		echo -e "$warnNot sure that was even a number let alone a valid one! Go back to the main nenu, now!"
+#		echo -e "$_reset "
+#		sleep 3
+#		clear
+#		mainMenu
+#	fi
+
+
 	#Gets brand short name from file
     chosenBrandS=$(cat $brandsFile | tail -n+$brandAnswer | head -1 | awk '{print $NF}')
     #Gets brand full name from file
     chosenBrandF=$(cat $brandsFile | tail -n+$brandAnswer | head -1 | awk '{$(NF--)=""; print}')
-	
+
+    #Refresh screen display
+    clear
+	_printPoweredBy
+	_arrow
+	echo -e "$infoSetting brand ...\n\n"
+	echo "You chose $chosenBrandF"
+	sleep 2
+
+
+
+	echo "Clearing existing brand...."
+	sleep 1
 	#Remove in-place branding
 	rm -f /var/www/dpportal/index.html
 	rm -f /var/www/dpportal/bg-mai*
 	rm -f /var/www/dpportal/logo-mai*
 	
-	
+	echo "Copying new brand files..."
     #Copies across site contents
     cp -f /var/www/dpportal/brands/$chosenBrandS/* /var/www/dpportal/
     cp -f /var/www/dpportal/brands/indextemplate.html /var/www/dpportal/index.html
-    cd /var/www/dpportal
-    
+    sleep 1
+
     #Sets full name in index file template
-    sed -i "s/COMPANYNAME/$chosenBrandF/g" index.html
-    
+    sed -i "s/COMPANYNAME/$chosenBrandF/g" /var/www/dpportal/index.html
+
     #Puts short name into current brand config file
 	echo $chosenBrandS > /etc/dpportal/config/current.conf
 	
     #Reloads apache and screen display
+	apacheStat=$(check_svc_status "apache2")
+	
+	if [[ "$apacheStat" == "Running" ]]; then
+		systemctl reload apache2
+		sleep 1
+	elif [[ "$apacheStat" == "Stopped" ]]; then
+		systemctl start apache2
+		sleep 1
+	else
+		echo -e "$warnPossible problem with Apache2 service status!"
+	fi
 
-
-    systemctl reload apache2
-	sleep 2
-    clear
-    _printPoweredBy
-    _arrow
-    
     #Notifies user and exits
     echo -e "$infoThe branding has been successfully set to $chosenBrandF.\n\nThank you, you can now run DPPortal with your new branding setup."
     sleep 1.5
@@ -260,13 +320,33 @@ function listAllBrands()
 
 	clear
 	_printPoweredBy
-	_arrow
-	echo -e "$infoList of installed branding.\n\n"
-	cat -n $brandsFile | awk '{$(NF--)=""; print}'
-	echo -e "$infoThe currently active brand is: \n\n$currentBrandF."
-	_arrow "Press any key when you are ready to return to the main menu."
-	read -s -n 1 "Waiting for key press..."
-	mainMenu
+	local i=1
+	_arrow 
+	echo -e "$_purple Lets see what we've got here then..."
+	
+	echo -e "$_bold\n\nINSTALLED BRANDING SETS\n "
+	echo -e "$_reset "
+	echo -e "$_green \n"
+	while IFS= read -r line; do
+	
+		shortBrandName="${line##* }"
+		
+		fullBrandName="${line% $shortBrandName}"
+		
+		echo "${i}. (${shortBrandName}) ${fullBrandName}"
+		
+		echo -e " \n "
+		
+		((i++))
+		
+	done < "$brandsFile"
+	echo -e "$_reset "
+	echo -e "$_tan\n\nThe currently active brand is: $currentBrandF."
+	echo -e "$_blue Press any key to return to the main menu..."
+	read -n 1 -s
+	clear
+	mainMenu	
+
 
 }
 
