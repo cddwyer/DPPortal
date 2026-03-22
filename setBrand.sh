@@ -23,20 +23,18 @@ function _printPoweredBy()
 {
     cat <<"EOF"
 
+################################################################
 
-
-  _____  _____        _____   ____  _____ _______       _      
- |  __ \|  __ \      |  __ \ / __ \|  __ \__   __|/\   | |     
- | |  | | |__) |_____| |__) | |  | | |__) | | |  /  \  | |     
- | |  | |  ___/______|  ___/| |  | |  _  /  | | / /\ \ | |     
- | |__| | |          | |    | |__| | | \ \  | |/ ____ \| |____ 
- |_____/|_|          |_|     \____/|_|  \_\ |_/_/    \_\______|
-                                                               
+  _____  _____       _____   ____  _____ _______       _      
+ |  __ \|  __ \     |  __ \ / __ \|  __ \__   __|/\   | |     
+ | |  | | |__) |____| |__) | |  | | |__) | | |  /  \  | |     
+ | |  | |  ___/_____|  ___/| |  | |  _  /  | | / /\ \ | |     
+ | |__| | |         | |    | |__| | | \ \  | |/ ____ \| |____ 
+ |_____/|_|         |_|     \____/|_|  \_\ |_/_/    \_\______| 
 
   written by: Double_D
 
-Captive portal branding setup.
-
+DP Captive Portal branding setup.
 
 ################################################################
 EOF
@@ -135,6 +133,7 @@ function get_image() {
 	local new_img_path
 	
 	while true; do
+		echo -e "$_blue "
 		read -r -p "$prompt_message: " image_path
 		
 		if [[ ! -f "$image_path" ]]; then
@@ -224,29 +223,13 @@ function setBrand()
     
     
     if ! [[ "$brandAnswer" =~ ^[1-9][0-9]*$ && "$brandAnswer" -le "$p" ]]; then
-		echo -e "$warnInvalid choice! Sending you back to the main menu..."
+		echo -e "$warn Invalid choice! Sending you back to the main menu..."
 		echo -e "$_reset "
 		sleep 3
 		clear
 		mainMenu
     fi
     
-#   if [[ "$brandAnswer" ! =~ ^[0-9]+$ ]]; then
-#		if (( brandAnswer <= p )); then
-#			echo " "
-#		else
-#			echo -e "$warnInvalid choice! Sending you back to the main menu..."
-#			echo -e "$_reset "
-#			sleep 3
-#			clear
-#			mainMenu
-#		fi
-#		echo -e "$warnNot sure that was even a number let alone a valid one! Go back to the main nenu, now!"
-#		echo -e "$_reset "
-#		sleep 3
-#		clear
-#		mainMenu
-#	fi
 
 
 	#Gets brand short name from file
@@ -258,20 +241,20 @@ function setBrand()
     clear
 	_printPoweredBy
 	_arrow
-	echo -e "$infoSetting brand ...\n\n"
-	echo "You chose $chosenBrandF"
+	echo -e "$info Setting brand ...\n\n"
+	echo -e "$_blue You chose $chosenBrandF"
 	sleep 2
 
 
 
-	echo "Clearing existing brand...."
+	echo -e "$_green Clearing existing brand...."
 	sleep 1
 	#Remove in-place branding
 	rm -f /var/www/dpportal/index.html
 	rm -f /var/www/dpportal/bg-mai*
 	rm -f /var/www/dpportal/logo-mai*
 	
-	echo "Copying new brand files..."
+	echo -e "$_green Copying new brand files..."
     #Copies across site contents
     cp -f /var/www/dpportal/brands/$chosenBrandS/* /var/www/dpportal/
     cp -f /var/www/dpportal/brands/indextemplate.html /var/www/dpportal/index.html
@@ -280,9 +263,13 @@ function setBrand()
     #Sets full name in index file template
     sed -i "s/COMPANYNAME/$chosenBrandF/g" /var/www/dpportal/index.html
 
+
+	sleep 0.5
+	echo -e "$_green Writing new brand to config files..."
     #Puts short name into current brand config file
 	echo $chosenBrandS > /etc/dpportal/config/current.conf
 	
+	echo -e "$_green Reloading Apache2..."
     #Reloads apache and screen display
 	apacheStat=$(check_svc_status "apache2")
 	
@@ -297,13 +284,13 @@ function setBrand()
 	fi
 
     #Notifies user and exits
-    echo -e "$infoThe branding has been successfully set to $chosenBrandF.\n\nThank you, you can now run DPPortal with your new branding setup."
+    echo -e "$info The branding has been successfully set to $chosenBrandF.\n\nThank you, you can now run DPPortal with your new branding setup."
     sleep 1.5
 	_arrow "Would you like to now launch DPPortal with the new brand set? (y/[n])"
 	read runNowChoice
     
 	if [[ "$runNowChoice" != "y" ]]; then
-		echo -e "$warnYou said no, of gave an invalid choice, exiting now..."
+		echo -e "$warn You said no, or gave an invalid choice. \n\n Exiting now..."
     	_safeExit "Goodbye"
 	else
 		./bootstrap.sh
@@ -318,6 +305,7 @@ function setBrand()
 function listAllBrands()
 {
 
+	echo -e "$_reset "
 	clear
 	_printPoweredBy
 	local i=1
@@ -341,9 +329,11 @@ function listAllBrands()
 		
 	done < "$brandsFile"
 	echo -e "$_reset "
-	echo -e "$_tan\n\nThe currently active brand is: $currentBrandF."
-	echo -e "$_blue Press any key to return to the main menu..."
+	echo -e "$_tan\n\nThe currently active brand is: "
+	echo -e "$_blue $currentBrandF."
+	echo -e "$_green \n\nPress any key to return to the main menu..."
 	read -n 1 -s
+	echo -e "$_reset"
 	clear
 	mainMenu	
 
@@ -355,20 +345,22 @@ function listAllBrands()
 
 function createNewBrand()
 {
-
+	
+	
 	#Standard header
+	echo -e "$_reset "
 	clear
 	_printPoweredBy
 	
-	echo "$info\n\nLets get this new brand setup.\n\n"
+	echo -e "$info Lets get this new brand setup.\n\n"
 
 
 	#Get user friendly name of company branding to use
-	echo -e "$qWhat's the user friendly name (in proper case, with spaces but no special characters other than hyphens and underscores etc) of the company branding you're going to use? (e.g. \"Starbucks Pro-Genocide Coffee Company.\")\n\n"
+	echo -e "$q What's the user friendly name (in proper case, with spaces but no special characters other than hyphens and underscores etc) of the company branding you're going to use? (e.g. \"Starbucks Pro-Genocide Coffee Company.\")\n\n"
 	read newFriendlyName
 
 	if [[ -z "$newFriendlyName" ]]; then
-		echo -e "$warn\nThis can't be blank! Bye now. Troll!"
+		echo -e "$warn This can't be blank! Bye now. Troll!"
 		_error "You done fucked up! Sending you back to the main menu..."
 		sleep 3
 		mainMenu
@@ -385,7 +377,7 @@ function createNewBrand()
 	fi
 
 	#Get shortname to use in folder naming
-	echo -e "$qWhat's a shortname for the branding? This cannot contain special characters or spaces! (e.g. for Transport For London use \"TFL\" or \"ldntransport\" etc.)\n\n"
+	echo -e "$q What's a shortname for the branding? This cannot contain special characters or spaces! (e.g. for Transport For London use \"TFL\" or \"ldntransport\" etc.)\n\n"
 	read newShortName
 	
 	
@@ -399,7 +391,7 @@ function createNewBrand()
 	
 	#Check if short name is alpha numeric with only -'s and _'s
 	if [[ ! "$newShortName" =~ ^[A-Za-z0-9_-]+$ ]]; then
-		echo -e "$warnYour friendly name has special characters in it or it's blank! \n\nWhat did I tell you about special charaters in short names?! Plank!"
+		echo -e "$warn Your friendly name has special characters in it or it's blank! \n\nWhat did I tell you about special charaters in short names?! Plank!"
         _error "Daft bastard...!"
 		_error "You done fucked up! Sending you back to the main menu..."
 	    sleep 2
@@ -409,7 +401,7 @@ function createNewBrand()
 	
 	#Check if short name has a space in
     if [[ "$newShortName" =~ [[:space:]] ]]; then
-    	echo -e "$warnWhat did I tell you about spaces in the short name?! Daft bastard!"
+    	echo -e "$warn What did I tell you about spaces in the short name?! Daft bastard!"
         _error "You done fucked this right up!"
 		sleep 2
 		clear
@@ -429,14 +421,17 @@ function createNewBrand()
 	#Make directory for brand
 	mkdir -p /var/www/dpportal/brands/$newShortName
 
+	echo -e "$_reset "
 	_arrow
 
 	#Get background image
 	get_image "Please enter the full file path to a background image for the page in PNG or JPG form only(if it's not big enough, it will end up looking stretched! e.g. /home/me/pic.png)\n\n" "bg-main" "$newShortName"
 
+	echo -e "$_reset"
+	_arrow
 
 	#Get logo image
-	get_image "Please enter the full file path to a small logo/badge image for the new branding. e.g. /path/to/image.jpg\n\n" "logo-main" "$newShortName"
+	get_image "Please enter the full file path to a small logo/badge image for the new branding. e.g. /path/to/image.jpg" "logo-main" "$newShortName"
 
 	
 	
@@ -447,13 +442,18 @@ function createNewBrand()
 	sed -i 's/REPLACETHISWITHBGIMAGE/$wholeBGName/g' /var/www/dpportal/brands/$newShortName/index.html
 	sed -i 's/REPLACETHISWITHLOGOIMAGE/$wholeLogoName/g' /var/www/dpportal/brands/$newShortName/index.html
 
+	echo "$_green Installing your new brand..."
+	sleep 3
+
+	
 
 	#Add brand to list file
 	echo "$newFriendlyName $newShortName" >> /etc/dpportal/config/brands.lst
     
     #Inform user branding installed but not set and sends them back to the main menu
-    echo -e "$info\nYour new branding has been installed, you must enable it as the active one by returning to the main menu and selecting option 2. \n\nPress any key to return to the main menu..."
+    echo -e "$info Your new branding has been installed, you must enable it as the active one by returning to the main menu and selecting option 2. \n\nPress any key to return to the main menu..."
     read -s -n 1 "Waiting for key press..."
+    echo -e "$_reset "
     mainMenu
     
 
@@ -464,6 +464,7 @@ function createNewBrand()
 function mainMenu()
 {
 	clear
+	echo -e "$_reset "
 	_printPoweredBy
 	_arrow
 	
@@ -474,7 +475,9 @@ function mainMenu()
 	echo -e "\n3. Install a new branding set.\n"
 	echo -e "\n\nq. Quit.\n"
 	
-	echo -e "$info\n\nThe currently installed brand is: $currentBrandF\n\n\n"
+	echo -e "$info\n\nThe currently installed brand is: "
+	echo -e "$_blue $currentBrandF\n\n\n"
+	echo -e "$_reset"
 	
 	read mainMenuChoice
 	
