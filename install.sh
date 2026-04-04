@@ -210,6 +210,8 @@ function apacheBounce() {
 
 function initAuthCreds() {
 
+	a2enmod auth_digest
+
 	passMatch=0
 
 	#Setup credentials for display panel site authentication
@@ -469,6 +471,7 @@ function checkPreReqs()
 
 
 function enableBasicAuth() {
+
 
 apacheCFG="/etc/apache2/apache2.conf"
 
