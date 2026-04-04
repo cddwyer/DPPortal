@@ -196,6 +196,17 @@ function getUserConsent()
 
 }
 
+function apacheBounce() {
+
+	if systemctl is-active --quiet apache2; then
+		echo "Apache2 running - realoading..."
+		systemctl reload apache2
+	else
+		echo "Apache2 isn't running, starting it now..."
+		systemctl start apache2
+	fi
+}
+
 
 function initAuthCreds() {
 
@@ -363,7 +374,7 @@ function setDatabasePHPConfig()
 {
 
 cd /var/www/dpportal/login/modules
-sed -i "s/DPDBPASSWORD/$DB_PASS/g" dbcfg.conf
+sed -i "s/DPDBPASSWORD/$DB_PASS/g" dbcfg.php
 
 cp --preserve dbcfg.php /var/www/dppdisplay/
 
@@ -509,7 +520,7 @@ function installContent()
 	#Disable any current sites in Apache2
     echo -e "$info\nDisabling existing sites running in Apache2\n"
     rm -rf /etc/apache2/sites-enabled/*
-    systemctl reload apache2
+    apacheBounce
     sleep 2
 
 	#Install site configs
@@ -529,7 +540,7 @@ function installContent()
     
     a2ensite dpportal.conf
     a2ensite dppdisplay.conf
-    systemctl reload apache2
+    apacheBounce
 
 #branding config files
 	cp $installDir/config/current.conf /etc/dpportal/config/
