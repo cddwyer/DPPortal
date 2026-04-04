@@ -66,53 +66,66 @@ This will then create a new branding set you will be able to chose from the
 menu in the previous step.
 
 
-## Installing and running DPPortal
+## Prerequisites
 
-### Operating System Requirements
-This has been tested on Kali Linux 2023.2 onwards but will probably work with:
 
-* Kali 2022.2+ (untested)
+### Hardware
+
+* 2GB RAM
+* 180MB Disk Space (minimum for DPPortal only, not including OS and dependencies)
+* Wirless adapter must be capable of promiscuous mode
+* Secondary network interface (optional)
+
+### Operating System
+
+This was developed on Kali Linux 2023.2 but supports/will probably work with:
+
+* Kali 2022.2+
 * Ubuntu 18.04+
-* Raspberry Pi OS  (Recommended Pi OS v9 (Stretch) onwards on a Pi3+ or better)
-* Debian based Linux with GNU Bash v5.x+ & PHP v7.x+
-
+* Raspberry Pi OS  (tested with Pi OS v9 Stretch on a Pi4)
+* Debian based Linux
+* Sudo access
 
 ### Package Dependencies
 
+* Bash
 * berate_ap 
 * eterm
 * airmon-ng
 * Apache2 
 * MySQL/MariaDB
-* PHP7
+* PHP7+
 * hostapd-mana
-* bash
 * util-linux
 * procps or procps-ng
 * iproute2
+* net-tools
 * iw
 * iwconfig (only if 'iw' doesn't recognise your attached W-NIC)
 * dnsmasq
 * iptables
+* mdk3
 
 * Appropriate 802.11 drivers for your NIC
 
 
-### Installation
+## Installation
 
-To install DPPortal on your machine run:
+### To install DPPortal on your machine run the following commands.
+
+To clone the repository to your machine:
 ```
 git clone https://github.com/ddwyer/dpportal.git
 ```
-to clone the repository, then step into the parent directory:
+### Step into the parent directory of the repo:
 ```
 cd dpportal
 ```
-give the install script execution permissions by running:
+### Make the installer executable:
 ```
 chmod a+x install.sh
 ```
-Then, finally, as root or with sudo privileges run the install script itself:
+### Kick off the installation process:
 ```
 sudo ./install.sh
 ```
@@ -122,15 +135,16 @@ sudo bash install.sh
 ```
 
 
+
 ### Running DPPortal
 
-* Run dp-portal from terminal with your main intended function as an arguement. There are three different options.
+* Run dpportal from terminal with your main intended function as an arguement. There are three different options.
 
 
-* To fire up the portal run:
+* To start at the dpportal main menu just run:
 
 ```
-dpportal run
+dpportal
 ```
 
 * To fire up the portal with the current configuration with no further user input needed (such as to setup a Pi appliance) run:
@@ -150,6 +164,7 @@ dpportal setbrand
 ```
 dpportal uninstall
 ```
+Though I wouldn't recommend it...
 
 
 ### Show Usage/Help
