@@ -1,6 +1,4 @@
-# ***STILL UNDER DEVELOPMENT***
-
-# Double_D's Dark Phishing Portal
+# Double_D's Dark Phishing Portal v1.0
 
 ```
 ________ ____________________              __         .__   
@@ -21,7 +19,7 @@ and logo, with multiple sign-in options available, all of which will harvest
 the credentials entered.
 
 > [!WARNING]
-> This project is still under development. You will notice that files that should be bash scripts are currently plain text files. I will change them to .sh files once developed to an acceptable/functional v1.0 and will remove this warning message.
+> This project is in version 1.0 - there are bound to be bugs but I think we're now in a place to release v1.0
 
 
 ## Portal and Login Options
@@ -194,6 +192,8 @@ Double_D
 
 
 ## Version History
+
+* 1.0 Various big fixes and function re-writes
 
 * 0.3 Editing the README file to test and configure git on my dev box
 	* Reformatted some text, clarified instuctions and added credits
