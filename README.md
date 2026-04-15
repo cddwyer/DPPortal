@@ -13,10 +13,10 @@ ________ ____________________              __         .__
 
 
 
-This is a phishing tool that deploys a wireless (802.11) network via access 
-point software 'berate_ap' with a captive portal with customisable branding
-and logo, with multiple sign-in options available, all of which will harvest
-the credentials entered.
+This is a phishing tool that deploys a wireless (802.11) rogue network access 
+point via software 'berate_ap' with a captive portal with customisable branding
+and logos, with multiple OAuth style sign-in options available, all of which 
+will harvest any credentials entered.
 
 > [!WARNING]
 > This project is in version 1.0 - there are bound to be bugs but I think we're now in a place to release v1.0
@@ -83,6 +83,7 @@ This was developed on Kali Linux 2023.2 but supports/will probably work with:
 * Raspberry Pi OS  (tested with Pi OS v9 Stretch on a Pi4)
 * Debian based Linux
 * Sudo access
+* Have a password set for your MySQL root user!
 
 ### Package Dependencies
 
@@ -132,6 +133,13 @@ or
 sudo bash install.sh
 ```
 
+1. You will be asked to set a custom domain for your portal but we recommend 
+sticking with the default values. 
+
+2. You can set a password for your loot display panel.
+
+3. You will also need to set the password for your MySQL root user during the 
+install process.
 
 
 ### Running DPPortal
