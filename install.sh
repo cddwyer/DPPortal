@@ -179,6 +179,21 @@ function _safeExit()
 }
 
 
+function modFixBerate() {
+
+	local berateFile="/usr/bin/berate_ap"
+	local dodgyLineNum=1855
+
+	[[ -f "$berateFile" ]] || return 1
+
+	if [[ "$(sed -n "${dodgyLineNum}p" "$berateFile")" == *"adapter can not transmit"* ]]; then
+		sed -i "${dodgyLineNum}d" "$berateFile"
+	fi
+
+}
+
+
+
 function getUserConsent()
 {
 
@@ -619,4 +634,6 @@ _printPoweredBy "Tweaking your SQL nips..."
 sleep 1
 insertSQLPass
 sleep 1
-
+_printPoweredBy "Fixing Berate_AP's channel discrimination..."
+modFixBerate
+sleep 1
