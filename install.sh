@@ -398,6 +398,97 @@ cp --preserve dbcfg.php /var/www/dppdisplay/
 
 }
 
+function checkPackages()
+{
+
+	MISSING_PACKAGES=""
+
+	local packages=(
+	xterm
+	wmctrl
+	xdotool
+	berate-ap
+	apache2
+	hostapd-mana
+	util-linux
+	net-tools
+	procps
+	iproute2
+	iw
+	dnsmasq
+	iptables
+	mdk3
+	)
+
+	for pkg in "${packages[@]}"; do
+
+		if dpkg -s "$pkg" >/dev/null 2>&1; then
+			_success "$pkg"
+		else
+			_error "$pkg"
+			MISSING_PACKAGES+=" $pkg"
+		fi
+		sleep 0.5
+	done
+
+    #
+    # MySQL / MariaDB Server
+    #
+	if dpkg -s mariadb-server >/dev/null 2>&1; then
+		_success "mariadb-server"
+	elif dpkg -s mysql-server >/dev/null 2>&1; then
+		_success "mysql-server"
+	else
+		_error "mariadb-server/mysql-server"
+		MISSING_PACKAGES+=" mariadb-server"
+	fi
+
+	sleep 0.5
+
+    #
+    # PHP 7+
+    #
+	local php_version
+
+	if command -v php >/dev/null 2>&1; then
+
+		php_version=$(php -r 'echo PHP_MAJOR_VERSION;')
+
+		if [[ "$php_version" -ge 7 ]]; then
+			_success "php"
+		else
+			_error "php (version < 7)"
+			MISSING_PACKAGES+=" php"
+		fi
+
+	else
+		_error "php"
+		MISSING_PACKAGES+=" php"
+	fi
+
+	sleep 0.5
+
+    # Remove leading whitespace
+	MISSING_PACKAGES="${MISSING_PACKAGES# }"
+
+	if [[ -n "$MISSING_PACKAGES" ]]; then
+		echo "Missing packages:"
+		echo "$MISSING_PACKAGES"
+
+		_arrow "Would you like to install these missing packages now? (Y/n)"
+		read installMissingAnswer 
+	
+		if [[ "$installMissingAnswer" == "n" ]]; then
+			_error "Looks like you wont be able to use this awesome tool then, sorry..."
+			_die "Goodbye..."
+		else
+			sudo apt install $MISSING_PACKAGES
+		fi
+	fi
+
+}
+
+
 function checkPreReqs()
 {
 
@@ -481,6 +572,8 @@ function checkPreReqs()
 			fi
 		fi
 	fi
+
+checkPackages
 
 }
 

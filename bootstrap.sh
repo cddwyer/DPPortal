@@ -143,6 +143,45 @@ function configExists()
 	fi
 }
 
+function showDPClients()
+{
+
+    local LOG_DIR="/etc/dpportal/logs"
+    local FILE="$dppErrLogName"
+
+    if [[ -z "$FILE" ]]; then
+        echo "Usage: tail_log_window <log_filename>"
+        return 1
+    fi
+
+    local LOG="${LOG_DIR}/${FILE}"
+
+    if [[ ! -f "$LOG" ]]; then
+        echo "File not found: $LOG"
+        return 1
+    fi
+
+    local TITLE="TAIL_$$"
+
+    local SW SH
+    SW=$(xdpyinfo | awk '/dimensions:/ {split($2,a,"x"); print a[1]}')
+    SH=$(xdpyinfo | awk '/dimensions:/ {split($2,a,"x"); print a[2]}')
+
+    # Slightly less than a quarter of the screen
+    local W=$((SW * 45 / 100))
+    local H=$((SH * 45 / 100))
+    local X=$((SW - W))
+
+    xterm -T "$TITLE" -e "tail -n 50 -f \"$LOG\"" &
+
+    local WIN_ID
+    WIN_ID=$(xdotool search --sync --name "$TITLE" | head -n1)
+
+    wmctrl -ir "$WIN_ID" -e "0,$X,0,$W,$H"
+
+
+}
+
 
 function loadQuickStart()
 {
@@ -373,13 +412,19 @@ function postFlight()
     echo -e "$dppErrLog\n\n"
     
     #If user wants it, show connected clients as and when they connect
-    if [[ "$openClients" -eq 1 ]]; then
-    	#Not sure if this is one one-off list output or a live tail - may need to modify to update list every couple of seconds or something
-    	Eterm -g 80x8-0+225 --pointer-color "dark orange" -f DarkOrchid4 -b LightYellow1 -r --font-fx none --buttonbar 0  --scrollbar 0 -q -T "List of mugs as they connect to our roastathon..." -e berate_ap --list-clients $thisBeratePID 2> /dev/null &
-	fi
-	
+#    if [[ "$openClients" -eq 1 ]]; then
+#    	#Not sure if this is one one-off list output or a live tail - may need to modify to update list every couple of seconds or something
+#    	Eterm -g 80x8-0+225 --pointer-color "dark orange" -f DarkOrchid4 -b LightYellow1 -r --font-fx none --buttonbar 0  --scrollbar 0 -q -T "List of mugs as they connect to our roastathon..." -e berate_ap --list-clients $thisBeratePID 2> /dev/null &
+#	fi
+
     #show running message
 	_success "DP_Portal is running, waiting for some absolute mugs to connect and take the phishing bait...!"
+
+
+	if [[ "$openClients" -eq 1 ]]; then
+		showDPClients
+	fi
+
 
 }
 
