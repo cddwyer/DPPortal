@@ -512,11 +512,12 @@ function welcomeAll()
 {
 
 	#Before any frilly output, check whether to auto-run, if arguement has been passed it will kick off the autoKick function which requires no user input
-	quantArgs = $#
+	quantArgs=$#
 	if [[ "$quantArgs" -eq 1 ]]; then
 		singleArg = $1
 		if [[ "$singleArg" == "ar" ]]; then
 			autoKick
+			return 0
 		fi
 	fi
 
