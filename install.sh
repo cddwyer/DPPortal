@@ -98,8 +98,7 @@ function initBlurb() {
 		echo "User specified custom loot portal domain of $lootDomainAns" >> $installLog
 		touch /etc/dpportal/config/customdomain.conf
 	fi
-	
-	
+
 
 }
 
@@ -112,25 +111,25 @@ function generatePassword()
 }
 
 
-function checkSQLRunning()
-{
 
-if systemctl is-active --quiet "$dbServerName"; then
-        echo "$dbServerName is already running."
-    else
-        echo "$dbServerName is not running. Starting it..."
-        sudo systemctl start "$dbServerName"
 
-        if systemctl is-active --quiet "$dbServerName"; then
-            echo "$dbServerName started successfully."
+function start_mysql() {
+    if ! systemctl is-active --quiet mysql && ! systemctl is-active --quiet mariadb; then
+        echo "MySQL/MariaDB is not running. Starting service..."
+
+        if systemctl list-unit-files | grep -q '^mysql\.service'; then
+            sudo systemctl start mysql
+        elif systemctl list-unit-files | grep -q '^mariadb\.service'; then
+            sudo systemctl start mariadb
         else
-            echo "Failed to start $dbServerName."
-            _error "This installation can't continue until your database server works..."
+            echo "No MySQL or MariaDB systemd service found."
+            return 1
         fi
+    else
+        echo "MySQL/MariaDB is already running."
     fi
-
-
 }
+
 
 
 function setDBDetails() {
@@ -256,13 +255,11 @@ function initAuthCreds() {
 	#Setup credentials for display panel site authentication
 	valUser="pwner"
     
-    adminAuthFilePath=/etc/dpportal/config/.htpasswd
+    adminAuthFilePath=/var/www/dppdisplay/.htpasswd
     touch $adminAuthFilePath
     
 	#Loop input requests until passwords match
-	#passMatch=0
-	#while [[ $passMatch -ne 1 ]]
-	#do
+
 	while true; do
     		#clear
         	#_printPoweredBy
@@ -305,6 +302,7 @@ function initAuthCreds() {
 #Function to create database and table if it doesnt exist already and grabs root password if needed
 function createDBStuff()
 {
+	start_mysql
 	SQL1="CREATE DATABASE ${DB_NAME};"
 	SQL2="CREATE USER '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASS}';"
 	SQL3="GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';"
@@ -314,7 +312,7 @@ function createDBStuff()
 
 	if [ -f /root/.my.cnf ]; then
     		echo -e "$info\nCreating MySQL user and database...\n"
-        	$BIN_MYSQL -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}"
+        	$BIN_MYSQL -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}${SQL6}"
         	if [[ $? -eq 0 ]]; then
         		clear
             		_printPoweredBy
@@ -346,7 +344,7 @@ function createDBStuff()
         	_arrow "Please enter root MySQL/MariaDB user password!"
         	read rootPassword
         	echo -e "$info\nCreating MySQL user and database...\n"
-        	$BIN_MYSQL -u root -p${rootPassword} -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}" >>$installLog 2>&1
+        	$BIN_MYSQL -u root -p${rootPassword} -e "${SQL1}${SQL2}${SQL3}${SQL4}${SQL5}${SQL6}" >>$installLog 2>&1
         	sleep 2
         	if [[ $? -eq 0 ]]; then
         		clear
@@ -754,7 +752,7 @@ sleep 1
 clear
 _printPoweredBy
 _arrow "Checking SQL server"
-checkSQLRunning
+start_mysql
 sleep 1
 clear
 _printPoweredBy
